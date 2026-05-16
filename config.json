@@ -1,0 +1,40 @@
+﻿{
+  "brand": {
+    "name": "Новостройки СПб",
+    "welcomeImage": "https://via.placeholder.com/800x400/1a365d/fff?text=Недвижимость+на+любой+кошелёк",
+    "welcomeTitle": "Подберём квартиру под ваш бюджет",
+    "welcomeSubtitle": "Каталог проверенных новостроек Санкт-Петербурга",
+    "primaryColor": "#1a365d",
+    "accentColor": "#d4af37"
+  },
+  "data": {
+    "source": "google_sheets",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAJn5ah-8UjagF2CloZWriSpKLyMkD5RxLzYOHC7PCtcCe33iTs5NvqM2dLs8QLCuMIrkIOytK0PWy/pubhtml?gid=0&single=true",
+    "activeColumn": "active"
+  },
+  "filters": {
+    "enabled": ["district", "metro", "price", "rooms", "status", "class", "finishing"],
+    "defaults": {
+      "district": "all",
+      "metro": "all",
+      "minPrice": 0,
+      "maxPrice": 500,
+      "rooms": "all",
+      "status": "all",
+      "class": "all",
+      "finishing": "all"
+    }
+  },
+  "features": {
+    "showWelcomeScreen": true,
+    "showMap": true,
+    "showCalculator": false,
+    "showBookingForm": true
+  },
+  "texts": {
+    "ctaButton": "Получить консультацию",
+    "emptyState": "Нет объектов по заданным фильтрам. Попробуйте расширить поиск.",
+    "mapToggle": "🗺 Карта",
+    "listToggle": "📋 Список"
+  }
+}

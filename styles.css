@@ -1,0 +1,236 @@
+﻿:root {
+  --primary: #1a365d;
+  --accent: #d4af37;
+  --bg: #f7fafc;
+  --card-bg: #ffffff;
+  --text: #2d3748;
+  --text-secondary: #718096;
+  --border: #e2e8f0;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Welcome Screen */
+#welcomeScreen {
+  text-align: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.welcome-image {
+  width: 100%;
+  max-width: 600px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+#welcomeTitle {
+  font-size: 28px;
+  margin-bottom: 12px;
+  color: var(--primary);
+}
+
+#welcomeSubtitle {  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.tg-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Main Content */
+#mainContent {
+  padding: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Filters */
+.filters {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+  margin-bottom: 12px;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.filter-group select,
+.filter-group input[type="range"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  background: white;
+}
+
+#priceValue {
+  font-weight: 600;
+  color: var(--primary);
+  margin-left: 8px;
+}
+
+/* View Toggle */
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.view-toggle button {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.view-toggle button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Listing Cards */
+.listing-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.listing-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #e2e8f0;
+}
+
+.listing-info {
+  padding: 16px;
+}
+
+.listing-info h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+
+.listing-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.listing-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.price-per-sqm {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.listing-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+.status-Сдан {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-Строится {
+  background: #bee3f8;
+  color: #2a4365;
+}
+
+.status-Частично\ сдан {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.listing-address {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+/* Utility */
+.hidden {
+  display: none !important;
+}
+
+/* Map Container */
+#mapContainer {
+  height: 400px;
+  background: #e2e8f0;
+  border-radius: 12px;
+}

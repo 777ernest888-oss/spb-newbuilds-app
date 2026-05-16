@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Новостройки СПб</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Welcome Screen -->
+  <div id="welcomeScreen">
+    <img id="welcomeImage" src="" alt="Welcome" class="welcome-image">
+    <h1 id="welcomeTitle"></h1>
+    <p id="welcomeSubtitle"></p>
+    <button id="startBtn" class="tg-btn">Начать подбор</button>
+  </div>
+
+  <!-- Main Content -->
+  <div id="mainContent" class="hidden">
+    <!-- Filters (заглушка для старта) -->
+    <div class="filters" id="filtersContainer">
+      <div class="filter-group">
+        <label>Район:</label>
+        <select id="districtFilter">
+          <option value="all">Все районы</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Цена до (млн ₽):</label>
+        <input type="range" id="priceFilter" min="0" max="50" step="1" value="50">
+        <span id="priceValue">50</span>
+      </div>
+    </div>
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+      <button id="listViewBtn" class="active">📋 Список</button>
+      <button id="mapViewBtn">🗺 Карта</button>
+    </div>
+
+    <!-- Listings Container -->
+    <div id="listingsContainer"></div>
+
+    <!-- Map Container (скрыт по умолчанию) -->
+    <div id="mapContainer" class="hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
