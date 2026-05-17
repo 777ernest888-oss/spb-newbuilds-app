@@ -404,6 +404,20 @@ function openDetails(id) {
     });
   }
  
+  // ✅ ДОБАВЛЯЕМ КНОПКУ ВНУТРЬ КАРТОЧКИ (ДЛЯ ПК)
+  const modalContent = document.querySelector('#detailsModal .modal-content');
+  let btn = document.getElementById('modalConsultBtn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'modalConsultBtn';
+    btn.className = 'tg-btn';
+    btn.style.marginTop = '20px';
+    btn.style.marginBottom = '40px';
+    modalContent.appendChild(btn);
+  }
+  btn.textContent = '📞 Получить консультацию';
+  btn.onclick = function() { openConsultForm(id); };
+ 
   document.getElementById('detailsModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
  
@@ -425,8 +439,7 @@ function closeModal() {
 // 📞 ОТКРЫТИЕ ФОРМЫ КОНСУЛЬТАЦИИ
 function openConsultForm(id, event) {
   if (event) event.stopPropagation();
-  currentModalId = id;
-  sendConsultRequest();
+  currentModalId = id;  sendConsultRequest();
 }
 
 // 📞 ФОРМА КОНСУЛЬТАЦИИ
@@ -439,9 +452,10 @@ function sendConsultRequest() {
   if (objNameEl) objNameEl.textContent = '🏢 ' + item.name;
  
   // Очищаем поля формы
-  const nameInput = document.getElementById('consultName');  const phoneInput = document.getElementById('consultPhone');
+  const nameInput = document.getElementById('consultName');
+  const phoneInput = document.getElementById('consultPhone');
   if (nameInput) nameInput.value = '';
-  if (phoneInput) phoneInput.value = '+7 ('; // Начальное значение для маски
+  if (phoneInput) phoneInput.value = '+7 (';
  
   // Открываем модалку с формой
   document.getElementById('consultModal').classList.remove('hidden');
@@ -474,23 +488,23 @@ function initPhoneMask() {
 function submitConsultForm(event) {
   event.preventDefault();
  
-  const item = listings.find(l => l.id === currentModalId);
-  if (!item) return;
+  const item = listings.find(l => l.id === currentModalId);  if (!item) return;
  
   const name = document.getElementById('consultName').value;
   let phone = document.getElementById('consultPhone').value;
  
-  // Проверка на валидность номера (должен быть полностью заполнен)
+  // Проверка на валидность номера
   if (phone.length < 18) {
     if (tg?.showAlert) tg.showAlert('❌ Введите корректный номер телефона');
     return;
   }
  
   // ⚠️ ВАЖНО: Вставь сюда свои данные!
-  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
-  const CHAT_ID = '2038206387'; 
-  // Короткое сообщение
-  const text = 'Новая заявка ЖК: ' + item.name + '\n\n👤 ' + name + '\n📱 ' + phone;
+  const BOT_TOKEN = '8974676618:AAEfwZu9ezT6DxgSjsrG17URMm4k6iF3WQM';
+  const CHAT_ID = '2038206387';
+ 
+  // ✅ ИСПРАВЛЕННЫЙ ТЕКСТ (УБРАНО ДВОЙНОЕ "ЖК")
+  const text = '🔔 Новая заявка!\n\n🏢 ' + item.name + '\n👤 ' + name + '\n📱 ' + phone;
  
   // Блокируем кнопку
   const submitBtn = event.target.querySelector('button[type="submit"]');
@@ -511,7 +525,6 @@ function submitConsultForm(event) {
       if (tg?.showAlert) tg.showAlert('✅ Заявка отправлена!');
       event.target.reset();
     } else {
-      // Выводим детальную ошибку для отладки
       console.error('Telegram Error:', data);
       if (tg?.showAlert) tg.showAlert('❌ Ошибка: ' + (data.description || 'Неизвестная ошибка'));
     }
@@ -525,7 +538,6 @@ function submitConsultForm(event) {
     submitBtn.disabled = false;
   });
 }
-
 function initMap() {
   const mapContainer = document.getElementById('mapContainer');
   if (mapContainer) {
@@ -537,7 +549,8 @@ function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
   div.textContent = text;
-  return div.innerHTML;}
+  return div.innerHTML;
+}
 
 // 🚀 ЗАПУСК
 if (document.readyState === 'loading') {
