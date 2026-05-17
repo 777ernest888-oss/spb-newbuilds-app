@@ -500,7 +500,7 @@ function submitConsultForm(event) {
   }
  
   // ⚠️ ВАЖНО: Вставь сюда свои данные!
-  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsrG17URMm4k6iF3WQM';
+  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr617URMm4k6iF3WQM';
   const CHAT_ID = '2038206387';
  
   // ✅ ИСПРАВЛЕННЫЙ ТЕКСТ (УБРАНО ДВОЙНОЕ "ЖК")
