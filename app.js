@@ -194,7 +194,7 @@ function renderWelcome() {
   if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
 }
 
-/ ✅ ФИЛЬТРЫ
+// ✅ ФИЛЬТРЫ
 function renderFilters() {
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
   const districtContainer = document.getElementById('districtCheckboxes');
