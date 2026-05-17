@@ -91,12 +91,15 @@ async function init() {
     renderFilters();
     renderListings(listings.filter(l => l.active));
    
+    // Инициализация маски телефона
+    initPhoneMask();
+   
     if (tg && tg.MainButton) {
       tg.MainButton.setText(config.texts?.ctaButton || 'Получить консультацию');
-      tg.MainButton.hide();
-      tg.MainButton.onClick(() => {
+      tg.MainButton.hide();      tg.MainButton.onClick(() => {
         if (currentModalId) {
-          sendConsultRequest();        }
+          sendConsultRequest();
+        }
       });
     }
    
@@ -142,10 +145,10 @@ function parseCSV(csv) {
     });
    
     result.push(obj);
-  }
- 
+  } 
   return result;
 }
+
 function parseCSVLine(line) {
   const result = [];
   let current = '';
@@ -191,9 +194,9 @@ function renderWelcome() {
   const titleEl = document.getElementById('welcomeTitle');
   const subEl = document.getElementById('welcomeSubtitle');
  
-  if (titleEl) titleEl.textContent = config.brand.welcomeTitle || '';
-  if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
+  if (titleEl) titleEl.textContent = config.brand.welcomeTitle || '';  if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
 }
+
 // ✅ ФИЛЬТРЫ
 function renderFilters() {
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
@@ -241,9 +244,9 @@ function renderFilters() {
     cb.addEventListener('change', filterListings);
   });
 }
-
 // 🔍 ФИЛЬТРАЦИЯ
-function filterListings() {  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
+function filterListings() {
+  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
  
   const selectedDistricts = Array.from(
     document.querySelectorAll('input[data-filter="district"]:checked')
@@ -289,16 +292,35 @@ function renderListings(data) {
     if (item.status === 'Сдан') statusText = '✅ Сдан';
     else if (item.status === 'Строится') statusText = '🏗 Строится';
     else if (item.status === 'Частично сдан') statusText = '🟡 Частично сдан';
-   
-    const card = document.createElement('div');
+        const card = document.createElement('div');
     card.className = 'listing-card';
-    card.onclick = function(e) {      // Если клик не по кнопке консультации — открываем детали
+    // Клик по карточке открывает детали, если клик не по кнопке
+    card.onclick = function(e) {
       if (!e.target.closest('.consult-btn-inline')) {
         openDetails(item.id);
       }
     };
    
-    card.innerHTML = '<img src="' + (escapeHtml(item.image_main) || '') + '" alt="' + (escapeHtml(item.name) || '') + '" class="listing-image" onerror="this.style.display=\'none\'"><div class="listing-info"><h3>' + (escapeHtml(item.name) || 'Без названия') + '</h3><div class="listing-meta"><span>' + (escapeHtml(item.district) || '') + '</span><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="listing-price">от ' + price + ' млн ₽' + (ppsqm ? '<span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '') + '</div><div class="listing-status status-' + statusKey + '">' + statusText + '</div><button class="tg-btn consult-btn-inline" style="margin-top: 12px; width: 100%;" onclick="openConsultForm(\'' + item.id + '\', event)">📞 Получить консультацию</button></div>';
+    // Добавляем кнопку ВНУТРЬ карточки
+    card.innerHTML = `
+      <img src="${escapeHtml(item.image_main) || ''}"
+           alt="${escapeHtml(item.name) || ''}"
+           class="listing-image"
+           onerror="this.style.display='none'">
+      <div class="listing-info">
+        <h3>${escapeHtml(item.name) || 'Без названия'}</h3>
+        <div class="listing-meta">
+          <span>${escapeHtml(item.district) || ''}</span>
+          <span>🚇 ${escapeHtml(item.metro) || ''}</span>
+        </div>
+        <div class="listing-price">
+          от ${price} млн ₽
+          ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}
+        </div>
+        <div class="listing-status status-${statusKey}">${statusText}</div>
+        <button class="tg-btn consult-btn-inline" onclick="openConsultForm('${item.id}', event)">📞 Получить консультацию</button>
+      </div>
+    `;
    
     container.appendChild(card);
   });
@@ -319,8 +341,7 @@ function openDetails(id) {
     : '';
  
   document.getElementById('modalPrice').innerHTML = 'от <b>' + price + '</b> млн ₽' + (ppsqm ? ' <span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '');
- 
-  document.getElementById('modalMeta').innerHTML = '<div class="meta-row"><span>📍 ' + (escapeHtml(item.address) || '') + '</span></div><div class="meta-row"><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="meta-row"><span>🏗 ' + (escapeHtml(item.class) || '') + ' • ' + (escapeHtml(item.finishing) || '') + '</span></div><div class="meta-row"><span>📅 ' + (escapeHtml(item.completion_all || item.completion_soonest) || '') + '</span></div>';
+    document.getElementById('modalMeta').innerHTML = '<div class="meta-row"><span>📍 ' + (escapeHtml(item.address) || '') + '</span></div><div class="meta-row"><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="meta-row"><span>🏗 ' + (escapeHtml(item.class) || '') + ' • ' + (escapeHtml(item.finishing) || '') + '</span></div><div class="meta-row"><span>📅 ' + (escapeHtml(item.completion_all || item.completion_soonest) || '') + '</span></div>';
  
   document.getElementById('modalDescription').textContent = item.description || 'Описание отсутствует';
  
@@ -341,7 +362,8 @@ function openDetails(id) {
     textDiv.textContent = item.floor_plans_text;
     plansContainer.appendChild(textDiv);
   }
-    if (item.floor_plans_images) {
+ 
+  if (item.floor_plans_images) {
     const galleryDiv = document.createElement('div');
     galleryDiv.className = 'floor-plans-gallery';
     const urls = item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean);
@@ -368,8 +390,7 @@ function openDetails(id) {
   if (item.image_main) {
     const mainImg = document.createElement('img');
     mainImg.src = item.image_main;
-    mainImg.className = 'modal-main-image';
-    gallery.appendChild(mainImg);
+    mainImg.className = 'modal-main-image';    gallery.appendChild(mainImg);
   }
  
   if (item.images_gallery) {
@@ -390,6 +411,7 @@ function openDetails(id) {
     tg.MainButton.show();
   }
 }
+
 function closeModal() {
   document.getElementById('detailsModal').classList.add('hidden');
   document.body.style.overflow = '';
@@ -400,7 +422,7 @@ function closeModal() {
   }
 }
 
-// 📞 ОТКРЫТИЕ ФОРМЫ КОНСУЛЬТАЦИИ (из карточки)
+// 📞 ОТКРЫТИЕ ФОРМЫ КОНСУЛЬТАЦИИ
 function openConsultForm(id, event) {
   if (event) event.stopPropagation();
   currentModalId = id;
@@ -416,11 +438,10 @@ function sendConsultRequest() {
   const objNameEl = document.getElementById('consultObjectName');
   if (objNameEl) objNameEl.textContent = '🏢 ' + item.name;
  
-  // Очищаем поля формы (НЕ заполняем автоматически!)
-  const nameInput = document.getElementById('consultName');
-  const phoneInput = document.getElementById('consultPhone');
+  // Очищаем поля формы
+  const nameInput = document.getElementById('consultName');  const phoneInput = document.getElementById('consultPhone');
   if (nameInput) nameInput.value = '';
-  if (phoneInput) phoneInput.value = '';
+  if (phoneInput) phoneInput.value = '+7 ('; // Начальное значение для маски
  
   // Открываем модалку с формой
   document.getElementById('consultModal').classList.remove('hidden');
@@ -431,6 +452,25 @@ function closeConsultModal() {
   document.getElementById('consultForm').reset();
 }
 
+// 📱 МАСКА ТЕЛЕФОНА
+function initPhoneMask() {
+  const phoneInput = document.getElementById('consultPhone');
+  if (!phoneInput) return;
+ 
+  phoneInput.addEventListener('input', function(e) {
+    let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+    if (!x[2]) {
+      e.target.value = '+7 (';
+    } else {
+      e.target.value = !x[3] ? '+7 (' + x[2] : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+    }
+  });
+ 
+  phoneInput.addEventListener('focus', function(e) {
+    if (e.target.value === '') e.target.value = '+7 (';
+  });
+}
+
 function submitConsultForm(event) {
   event.preventDefault();
  
@@ -438,12 +478,18 @@ function submitConsultForm(event) {
   if (!item) return;
  
   const name = document.getElementById('consultName').value;
-  const phone = document.getElementById('consultPhone').value;
-    // ⚠️ ВАЖНО: Вставь сюда свои данные!
-  const BOT_TOKEN = '8974676618:AAEfwZu9ezT6DxgSjsrG17URMm4k6iF3WQM';
-  const CHAT_ID = '2038206387';
+  let phone = document.getElementById('consultPhone').value;
  
-  // Короткое сообщение, как ты просил
+  // Проверка на валидность номера (должен быть полностью заполнен)
+  if (phone.length < 18) {
+    if (tg?.showAlert) tg.showAlert('❌ Введите корректный номер телефона');
+    return;
+  }
+ 
+  // ⚠️ ВАЖНО: Вставь сюда свои данные!
+  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
+  const CHAT_ID = '2038206387'; 
+  // Короткое сообщение
   const text = 'Новая заявка ЖК: ' + item.name + '\n\n👤 ' + name + '\n📱 ' + phone;
  
   // Блокируем кнопку
@@ -465,11 +511,13 @@ function submitConsultForm(event) {
       if (tg?.showAlert) tg.showAlert('✅ Заявка отправлена!');
       event.target.reset();
     } else {
-      if (tg?.showAlert) tg.showAlert('❌ Ошибка: ' + data.description);
+      // Выводим детальную ошибку для отладки
+      console.error('Telegram Error:', data);
+      if (tg?.showAlert) tg.showAlert('❌ Ошибка: ' + (data.description || 'Неизвестная ошибка'));
     }
   })
   .catch(err => {
-    console.error(err);
+    console.error('Network Error:', err);
     if (tg?.showAlert) tg.showAlert('❌ Ошибка сети');
   })
   .finally(() => {
@@ -488,8 +536,8 @@ function initMap() {
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
-  div.textContent = text;  return div.innerHTML;
-}
+  div.textContent = text;
+  return div.innerHTML;}
 
 // 🚀 ЗАПУСК
 if (document.readyState === 'loading') {
