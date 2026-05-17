@@ -23,7 +23,7 @@ let config = {};
 let listings = [];
 let currentModalId = null;
 
-// ✅ ГЛОБАЛЬНАЯ ФУНКЦИЯ ПЕРЕХОДА
+// ✅ ГЛОБАЛЬНАЯ ФУНКЦИЯ ПЕРЕХОДА (для кнопки на стартовом экране)
 function startApp() {
   const welcome = document.getElementById('welcomeScreen');
   const main = document.getElementById('mainContent');
@@ -38,27 +38,7 @@ function startApp() {
   window.scrollTo(0, 0);
 }
 
-// 🔄 ПЕРЕКЛЮЧЕНИЕ ВИДА
-function switchView(view) {
-  const listBtn = document.getElementById('listViewBtn');
-  const mapBtn = document.getElementById('mapViewBtn');
-  const listContainer = document.getElementById('listingsContainer');
-  const mapContainer = document.getElementById('mapContainer');
- 
-  if (view === 'list') {
-    listBtn.classList.add('active');
-    mapBtn.classList.remove('active');    listContainer.classList.remove('hidden');
-    mapContainer.classList.add('hidden');
-  } else {
-    listBtn.classList.remove('active');
-    mapBtn.classList.add('active');
-    listContainer.classList.add('hidden');
-    mapContainer.classList.remove('hidden');
-    initMap();
-  }
-}
-
-// 🔽 СВЕРНУТЬ/РАЗВЕРНУТЬ ФИЛЬТРЫ
+//  СВЕРНУТЬ/РАЗВЕРНУТЬ ФИЛЬТРЫ
 function toggleFilters() {
   const block = document.getElementById('filtersBlock');
   const btn = document.querySelector('.filters-toggle-btn');
@@ -67,9 +47,29 @@ function toggleFilters() {
     block.classList.toggle('hidden');
     if (block.classList.contains('hidden')) {
       btn.textContent = '🔽 Фильтры';
-    } else {
-      btn.textContent = '🔼 Скрыть фильтры';
+    } else {      btn.textContent = '🔼 Скрыть фильтры';
     }
+  }
+}
+
+// 🔄 ПЕРЕКЛЮЧЕНИЕ ВИДА (Список/Карта)
+function switchView(view) {
+  const listBtn = document.getElementById('listViewBtn');
+  const mapBtn = document.getElementById('mapViewBtn');
+  const listContainer = document.getElementById('listingsContainer');
+  const mapContainer = document.getElementById('mapContainer');
+ 
+  if (view === 'list') {
+    listBtn.classList.add('active');
+    mapBtn.classList.remove('active');
+    listContainer.classList.remove('hidden');
+    mapContainer.classList.add('hidden');
+  } else {
+    listBtn.classList.remove('active');
+    mapBtn.classList.add('active');
+    listContainer.classList.add('hidden');
+    mapContainer.classList.remove('hidden');
+    initMap();
   }
 }
 
@@ -324,7 +324,7 @@ function renderListings(data) {
   });
 }
 
-// 🔍 ДЕТАЛИ ОБЪЕКТА
+//  ДЕТАЛИ ОБЪЕКТА
 function openDetails(id) {
   const item = listings.find(l => l.id === id);
   if (!item) return;
@@ -345,7 +345,7 @@ function openDetails(id) {
   document.getElementById('modalMeta').innerHTML = `
     <div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div>
     <div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div>
-    <div class="meta-row"><span>🏗 ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div>
+    <div class="meta-row"><span> ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div>
     <div class="meta-row"><span>📅 ${escapeHtml(item.completion_all || item.completion_soonest) || ''}</span></div>
   `;
  
@@ -460,7 +460,7 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// 🚀 ЗАПУСК
+//  ЗАПУСК
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
