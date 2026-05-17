@@ -466,6 +466,36 @@ input[type="range"]::-moz-range-thumb {
   font-size: 17px;
 }
 
+/* Consult Form Modal */
+#consultModal .modal-content {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  border-radius: 16px;
+}
+
+#consultForm input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+#consultForm input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+#consultObjectName {  margin-bottom: 20px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 /* Floor Plans */
 .floor-plans-text {
   font-size: 15px;
@@ -488,7 +518,8 @@ input[type="range"]::-moz-range-thumb {
 .floor-plan-image {
   width: 100%;
   height: auto;
-  aspect-ratio: 4/3;   object-fit: contain;
+  aspect-ratio: 4/3;
+  object-fit: contain;
   border-radius: 8px;
   cursor: pointer;
   border: 2px solid var(--border);
@@ -506,8 +537,7 @@ input[type="range"]::-moz-range-thumb {
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  color: var(--text-secondary);
-  font-size: 16px;
+  color: var(--text-secondary);  font-size: 16px;
 }
 
 /* Map Container */
@@ -537,7 +567,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .loading::after {
-  content: '';  width: 24px;
+  content: '';
+  width: 24px;
   height: 24px;
   border: 3px solid var(--border);
   border-top-color: var(--primary);
@@ -555,8 +586,7 @@ input[type="range"]::-moz-range-thumb {
   .floor-plans-gallery {
     grid-template-columns: 1fr;
   }
- 
-  #welcomeTitle {
+    #welcomeTitle {
     font-size: 24px;
   }
  
@@ -570,6 +600,11 @@ input[type="range"]::-moz-range-thumb {
  
   .modal-price {
     font-size: 20px;
+  }
+ 
+  #consultModal .modal-content {
+    margin: 20px auto;
+    padding: 20px;
   }
 }
 
