@@ -9,7 +9,7 @@
   },
   "data": {
     "source": "google_sheets",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAJn5ah-8UjagF2CloZWriSpKLyMkD5RxLzYOHC7PCtcCe33iTs5NvqM2dLs8QLCuMIrklOytKOPWy/pub?gid=0&single=true&output=csv",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAJn5ah-8UjagF2CloZWriSpKLyMkD5RxLzYOHC7PCtcCe33iTs5NvqM2dLs8QLCuMIrkIOytK0PWy/pubhtml",
     "activeColumn": "active"
   },
   "filters": {
