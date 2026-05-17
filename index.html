@@ -1,85 +1,396 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Новостройки СПб</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <!-- Welcome Screen -->
-  <div id="welcomeScreen">
-    <img id="welcomeImage" src="" alt="Welcome" class="welcome-image">
-    <h1 id="welcomeTitle"></h1>
-    <p id="welcomeSubtitle"></p>
-    <button id="startBtn" class="tg-btn">Начать подбор</button>
-  </div>
+:root {
+  --primary: #1a365d;
+  --accent: #d4af37;
+  --bg: #f7fafc;
+  --card-bg: #ffffff;
+  --text: #2d3748;
+  --text-secondary: #718096;
+  --border: #e2e8f0;
+  --success: #48bb78;
+  --warning: #ed8936;
+}
 
-  <!-- Main Content -->
-  <div id="mainContent" class="hidden">
-    <!-- Filters -->
-    <div class="filters" id="filtersContainer">
-      <div class="filter-group">
-        <label>Район:</label>
-        <div id="districtCheckboxes" class="checkbox-group"></div>
-      </div>
-      <div class="filter-group">
-        <label>Метро:</label>
-        <div id="metroCheckboxes" class="checkbox-group"></div>
-      </div>
-      <div class="filter-group">
-        <label>Цена до (млн ₽):</label>
-        <input type="range" id="priceFilter" min="0" max="500" step="1" value="500">
-        <div class="range-value"><span id="priceValue">500</span> млн ₽</div>
-      </div>
-    </div>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
-    <!-- View Toggle -->
-    <div class="view-toggle">
-      <button id="listViewBtn" class="active">📋 Список</button>
-      <button id="mapViewBtn">🗺 Карта</button>
-    </div>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
 
-    <!-- Listings Container -->
-    <div id="listingsContainer"></div>
+#welcomeScreen {
+  text-align: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
-    <!-- Map Container -->
-    <div id="mapContainer" class="hidden"></div>
-  </div>
+.welcome-image {
+  width: 100%;
+  max-width: 600px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-  <!-- Modal for Details -->
-  <div id="detailsModal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modalTitle">Название ЖК</h2>
-        <button class="close-btn" onclick="closeModal()">✕</button>
-      </div>
-      <div id="modalGallery" class="modal-gallery"></div>
-      <div class="modal-body">
-        <div class="modal-price" id="modalPrice"></div>
-        <div class="modal-meta" id="modalMeta"></div>
-       
-        <div class="modal-section">
-          <h3>Описание</h3>
-          <p id="modalDescription"></p>
-        </div>
-       
-        <div class="modal-section">
-          <h3>Характеристики</h3>
-          <div id="modalFeatures"></div>
-        </div>
-       
-        <div class="modal-section">
-          <h3>Планировки</h3>
-          <div id="modalFloorPlans"></div>
-        </div>
-       
-        <button class="tg-btn modal-cta" onclick="sendConsultRequest()">Получить консультацию</button>
-      </div>
-    </div>
-  </div>
+#welcomeTitle {
+  font-size: 28px;
+  font-weight: 700;  margin-bottom: 12px;
+  color: var(--primary);
+}
 
-  <script src="app.js"></script>
-</body>
-</html>
+#welcomeSubtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+.tg-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  max-width: 320px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(26, 54, 93, 0.3);
+}
+
+.tg-btn:active {
+  transform: scale(0.98);
+}
+
+#mainContent {
+  padding: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.filters {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.filter-group {
+  margin-bottom: 16px;
+}
+
+.filter-group:last-child {   margin-bottom: 0;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  background: #f0f4f8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.checkbox-label:hover {
+  background: #e2e8f0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 6px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkbox-label:has(input:checked) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 6px;  background: #e2e8f0;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.range-value {
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 8px;
+  font-size: 16px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.view-toggle button {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid var(--border);
+  background: var(--card-bg);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.view-toggle button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.listing-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  cursor: pointer;
+}
+
+.listing-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #e2e8f0;
+}
+
+.listing-info {
+  padding: 16px;
+}
+
+.listing-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+
+.listing-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.listing-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.price-per-sqm {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.listing-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;   font-weight: 600;
+  margin-top: 8px;
+}
+
+.status-Сдан { background: #c6f6d5; color: #22543d; }
+.status-Строится { background: #bee3f8; color: #2a4365; }
+.status-Частично-сдан { background: #fefcbf; color: #744210; }
+
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background: white;
+  min-height: 100%;
+  padding: 20px;
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  color: var(--primary);
+  margin-right: 40px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #718096;
+}
+.modal-gallery {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.modal-main-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.modal-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.modal-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+
+.modal-meta { margin-bottom: 24px; }
+
+.meta-row {
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.modal-section {
+  margin: 20px 0;
+  padding: 16px;
+  background: #f7fafc;
+  border-radius: 12px;
+}
+
+.modal-section h3 {
+  margin-bottom: 12px;
+  color: var(--primary);
+  font-size: 16px;  font-weight: 600;
+}
+
+.modal-section ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.modal-cta {
+  width: 100%;
+  margin-top: 24px;
+  padding: 18px;
+}
+
+.floor-plans-text {
+  font-size: 15px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.floor-plans-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.floor-plan-image {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: contain;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid var(--border);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+}
+
+#mapContainer {
+  height: 400px;
+  background: #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;  justify-content: center;
+}
+
+.hidden { display: none !important; }
