@@ -292,8 +292,13 @@ function renderListings(data) {
    
     const card = document.createElement('div');
     card.className = 'listing-card';
-    card.onclick = () => openDetails(item.id);   
-    card.innerHTML = '<img src="' + (escapeHtml(item.image_main) || '') + '" alt="' + (escapeHtml(item.name) || '') + '" class="listing-image" onerror="this.style.display=\'none\'"><div class="listing-info"><h3>' + (escapeHtml(item.name) || 'Без названия') + '</h3><div class="listing-meta"><span>' + (escapeHtml(item.district) || '') + '</span><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="listing-price">от ' + price + ' млн ₽' + (ppsqm ? '<span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '') + '</div><div class="listing-status status-' + statusKey + '">' + statusText + '</div></div>';
+    card.onclick = function(e) {      // Если клик не по кнопке консультации — открываем детали
+      if (!e.target.closest('.consult-btn-inline')) {
+        openDetails(item.id);
+      }
+    };
+   
+    card.innerHTML = '<img src="' + (escapeHtml(item.image_main) || '') + '" alt="' + (escapeHtml(item.name) || '') + '" class="listing-image" onerror="this.style.display=\'none\'"><div class="listing-info"><h3>' + (escapeHtml(item.name) || 'Без названия') + '</h3><div class="listing-meta"><span>' + (escapeHtml(item.district) || '') + '</span><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="listing-price">от ' + price + ' млн ₽' + (ppsqm ? '<span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '') + '</div><div class="listing-status status-' + statusKey + '">' + statusText + '</div><button class="tg-btn consult-btn-inline" style="margin-top: 12px; width: 100%;" onclick="openConsultForm(\'' + item.id + '\', event)">📞 Получить консультацию</button></div>';
    
     container.appendChild(card);
   });
@@ -336,12 +341,12 @@ function openDetails(id) {
     textDiv.textContent = item.floor_plans_text;
     plansContainer.appendChild(textDiv);
   }
- 
-  if (item.floor_plans_images) {
+    if (item.floor_plans_images) {
     const galleryDiv = document.createElement('div');
     galleryDiv.className = 'floor-plans-gallery';
     const urls = item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean);
-        urls.forEach(url => {
+   
+    urls.forEach(url => {
       const img = document.createElement('img');
       img.src = url;
       img.className = 'floor-plan-image';
@@ -385,17 +390,24 @@ function openDetails(id) {
     tg.MainButton.show();
   }
 }
-
 function closeModal() {
   document.getElementById('detailsModal').classList.add('hidden');
   document.body.style.overflow = '';
   currentModalId = null;
-    if (tg && tg.MainButton) {
+ 
+  if (tg && tg.MainButton) {
     tg.MainButton.hide();
   }
 }
 
-// 📞 ФОРМА КОНСУЛЬТАЦИИ (НОВАЯ)
+// 📞 ОТКРЫТИЕ ФОРМЫ КОНСУЛЬТАЦИИ (из карточки)
+function openConsultForm(id, event) {
+  if (event) event.stopPropagation();
+  currentModalId = id;
+  sendConsultRequest();
+}
+
+// 📞 ФОРМА КОНСУЛЬТАЦИИ
 function sendConsultRequest() {
   const item = listings.find(l => l.id === currentModalId);
   if (!item) return;
@@ -404,12 +416,11 @@ function sendConsultRequest() {
   const objNameEl = document.getElementById('consultObjectName');
   if (objNameEl) objNameEl.textContent = '🏢 ' + item.name;
  
-  // Автозаполнение имени из Telegram
-  const user = tg?.initDataUnsafe?.user || {};
+  // Очищаем поля формы (НЕ заполняем автоматически!)
   const nameInput = document.getElementById('consultName');
-  if (nameInput && user.first_name) {
-    nameInput.value = (user.first_name + ' ' + (user.last_name || '')).trim();
-  }
+  const phoneInput = document.getElementById('consultPhone');
+  if (nameInput) nameInput.value = '';
+  if (phoneInput) phoneInput.value = '';
  
   // Открываем модалку с формой
   document.getElementById('consultModal').classList.remove('hidden');
@@ -428,9 +439,8 @@ function submitConsultForm(event) {
  
   const name = document.getElementById('consultName').value;
   const phone = document.getElementById('consultPhone').value;
- 
-  // ⚠️ ВАЖНО: Вставь сюда свои данные!
-  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
+    // ⚠️ ВАЖНО: Вставь сюда свои данные!
+  const BOT_TOKEN = '8974676618:AAEfwZu9ezT6DxgSjsrG17URMm4k6iF3WQM';
   const CHAT_ID = '2038206387';
  
   // Короткое сообщение, как ты просил
@@ -439,7 +449,8 @@ function submitConsultForm(event) {
   // Блокируем кнопку
   const submitBtn = event.target.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
-  submitBtn.textContent = 'Отправка...';  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка...';
+  submitBtn.disabled = true;
  
   // Отправляем в Telegram
   fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
@@ -477,8 +488,7 @@ function initMap() {
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+  div.textContent = text;  return div.innerHTML;
 }
 
 // 🚀 ЗАПУСК
