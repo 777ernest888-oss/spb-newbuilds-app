@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -18,18 +18,20 @@
 
   <!-- Main Content -->
   <div id="mainContent" class="hidden">
-    <!-- Filters (заглушка для старта) -->
+    <!-- Filters -->
     <div class="filters" id="filtersContainer">
       <div class="filter-group">
         <label>Район:</label>
-        <select id="districtFilter">
-          <option value="all">Все районы</option>
-        </select>
+        <div id="districtCheckboxes" class="checkbox-group"></div>
+      </div>
+      <div class="filter-group">
+        <label>Метро:</label>
+        <div id="metroCheckboxes" class="checkbox-group"></div>
       </div>
       <div class="filter-group">
         <label>Цена до (млн ₽):</label>
-        <input type="range" id="priceFilter" min="0" max="50" step="1" value="50">
-        <span id="priceValue">50</span>
+        <input type="range" id="priceFilter" min="0" max="500" step="1" value="500">
+        <div class="range-value"><span id="priceValue">500</span> млн ₽</div>
       </div>
     </div>
 
@@ -42,8 +44,40 @@
     <!-- Listings Container -->
     <div id="listingsContainer"></div>
 
-    <!-- Map Container (скрыт по умолчанию) -->
+    <!-- Map Container -->
     <div id="mapContainer" class="hidden"></div>
+  </div>
+
+  <!-- Modal for Details -->
+  <div id="detailsModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Название ЖК</h2>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modalGallery" class="modal-gallery"></div>
+      <div class="modal-body">
+        <div class="modal-price" id="modalPrice"></div>
+        <div class="modal-meta" id="modalMeta"></div>
+       
+        <div class="modal-section">
+          <h3>Описание</h3>
+          <p id="modalDescription"></p>
+        </div>
+       
+        <div class="modal-section">
+          <h3>Характеристики</h3>
+          <div id="modalFeatures"></div>
+        </div>
+       
+        <div class="modal-section">
+          <h3>Планировки</h3>
+          <div id="modalFloorPlans"></div>
+        </div>
+       
+        <button class="tg-btn modal-cta" onclick="sendConsultRequest()">Получить консультацию</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
