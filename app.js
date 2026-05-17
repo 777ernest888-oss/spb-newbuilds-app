@@ -58,6 +58,21 @@ function switchView(view) {
   }
 }
 
+// 🔽 СВЕРНУТЬ/РАЗВЕРНУТЬ ФИЛЬТРЫ
+function toggleFilters() {
+  const block = document.getElementById('filtersBlock');
+  const btn = document.querySelector('.filters-toggle-btn');
+ 
+  if (block && btn) {
+    block.classList.toggle('hidden');
+    if (block.classList.contains('hidden')) {
+      btn.textContent = '🔽 Фильтры';
+    } else {
+      btn.textContent = '🔼 Скрыть фильтры';
+    }
+  }
+}
+
 // 🚀 ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ
 async function init() {
   try {
@@ -81,8 +96,7 @@ async function init() {
       tg.MainButton.onClick(() => {
         if (currentModalId) {
           sendConsultRequest();
-        }
-      });
+        }      });
     }
    
   } catch (error) {
@@ -96,7 +110,8 @@ async function loadFromGoogleSheets(url) {
   if (!csvUrl.includes('output=csv')) {
     csvUrl += (csvUrl.includes('?') ? '&' : '?') + 'output=csv';
   }
-    const response = await fetch(csvUrl);
+ 
+  const response = await fetch(csvUrl);
   const csvText = await response.text();
   return parseCSV(csvText);
 }
@@ -130,7 +145,6 @@ function parseCSV(csv) {
  
   return result;
 }
-
 function parseCSVLine(line) {
   const result = [];
   let current = '';
@@ -145,7 +159,8 @@ function parseCSVLine(line) {
       result.push(current);
       current = '';
     } else {
-      current += char;    }
+      current += char;
+    }
   }
   result.push(current);
  
@@ -179,8 +194,7 @@ function renderWelcome() {
   if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
 }
 
-// ✅ ФИЛЬТРЫ
-function renderFilters() {
+// ✅ ФИЛЬТРЫfunction renderFilters() {
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
   const districtContainer = document.getElementById('districtCheckboxes');
  
@@ -194,7 +208,8 @@ function renderFilters() {
         <span>${escapeHtml(d)}</span>
       `;
       districtContainer.appendChild(label);
-    });  }
+    });
+  }
  
   const metros = [...new Set(listings.map(l => l.metro).filter(Boolean))].sort();
   const metroContainer = document.getElementById('metroCheckboxes');
@@ -228,8 +243,7 @@ function renderFilters() {
   }
  
   document.querySelectorAll('.filter-checkbox').forEach(cb => {
-    cb.addEventListener('change', filterListings);
-  });
+    cb.addEventListener('change', filterListings);  });
 }
 
 function filterListings() {
@@ -243,7 +257,8 @@ function filterListings() {
     document.querySelectorAll('input[data-filter="metro"]:checked')
   ).map(cb => cb.value);
  
-  const filtered = listings.filter(item => {    if (!item.active) return false;
+  const filtered = listings.filter(item => {
+    if (!item.active) return false;
     if (typeof item.price_from !== 'number') return false;
     if (item.price_from > maxPrice) return false;
     if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
@@ -277,8 +292,7 @@ function renderListings(data) {
       : '';
    
     const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');
-    let statusText = item.status || '';
-   
+    let statusText = item.status || '';   
     if (item.status === 'Сдан') statusText = '✅ Сдан';
     else if (item.status === 'Строится') statusText = '🏗 Строится';
     else if (item.status === 'Частично сдан') statusText = '🟡 Частично сдан';
@@ -292,7 +306,8 @@ function renderListings(data) {
            alt="${escapeHtml(item.name) || ''}"
            class="listing-image"
            onerror="this.style.display='none'">
-      <div class="listing-info">        <h3>${escapeHtml(item.name) || 'Без названия'}</h3>
+      <div class="listing-info">
+        <h3>${escapeHtml(item.name) || 'Без названия'}</h3>
         <div class="listing-meta">
           <span>${escapeHtml(item.district) || ''}</span>
           <span>🚇 ${escapeHtml(item.metro) || ''}</span>
@@ -326,8 +341,7 @@ function openDetails(id) {
   document.getElementById('modalPrice').innerHTML = `
     от <b>${price}</b> млн ₽
     ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}
-  `;
- 
+  `; 
   document.getElementById('modalMeta').innerHTML = `
     <div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div>
     <div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div>
@@ -341,7 +355,8 @@ function openDetails(id) {
   if (item.features) {
     const featuresList = item.features.split(',').map(f => f.trim()).filter(Boolean);
     featuresDiv.innerHTML = `<ul>${featuresList.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>`;
-  } else {    featuresDiv.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
+  } else {
+    featuresDiv.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
  
   const plansContainer = document.getElementById('modalFloorPlans');
@@ -375,8 +390,7 @@ function openDetails(id) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
  
-  const gallery = document.getElementById('modalGallery');
-  gallery.innerHTML = '';
+  const gallery = document.getElementById('modalGallery');  gallery.innerHTML = '';
  
   if (item.image_main) {
     const mainImg = document.createElement('img');
@@ -390,7 +404,8 @@ function openDetails(id) {
     urls.forEach(url => {
       const img = document.createElement('img');
       img.src = url;
-      img.className = 'modal-thumb';      img.onclick = () => window.open(url, '_blank');
+      img.className = 'modal-thumb';
+      img.onclick = () => window.open(url, '_blank');
       gallery.appendChild(img);
     });
   }
@@ -424,8 +439,7 @@ function sendConsultRequest() {
     objectId: item.id,
     objectName: item.name,
     timestamp: new Date().toISOString()
-  };
- 
+  }; 
   tg.sendData(JSON.stringify(message));
   tg.showAlert(`✅ Заявка по ЖК "${item.name}" отправлена!`);
  
@@ -439,7 +453,8 @@ function initMap() {
   }
 }
 
-function escapeHtml(text) {  if (!text) return '';
+function escapeHtml(text) {
+  if (!text) return '';
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
