@@ -9,10 +9,11 @@ try {
     tg = {
       ready: () => {},
       expand: () => {},
-      MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {} },
+      MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {}, showProgress: () => {}, hideProgress: () => {} },
       showAlert: (msg) => alert(msg),
       sendData: (data) => console.log('sendData:', data),
-      close: () => {}
+      close: () => {},
+      initDataUnsafe: { user: {} }
     };
   }
 } catch (e) {
@@ -46,8 +47,8 @@ function toggleFilters() {
   if (block && btn) {
     block.classList.toggle('hidden');
     if (block.classList.contains('hidden')) {
-      btn.textContent = '🔽 Фильтры';
-    } else {      btn.textContent = '🔼 Скрыть фильтры';
+      btn.textContent = '🔽 Фильтры';    } else {
+      btn.textContent = '🔼 Скрыть фильтры';
     }
   }
 }
@@ -82,7 +83,7 @@ async function init() {
    
     if (config.data?.source === 'google_sheets' && config.data?.sheetUrl) {
       listings = await loadFromGoogleSheets(config.data.sheetUrl);
-      console.log(`✅ Загружено объектов: ${listings.length}`);
+      console.log('✅ Загружено объектов: ' + listings.length);
     }
    
     applyTheme();
@@ -95,8 +96,8 @@ async function init() {
       tg.MainButton.hide();
       tg.MainButton.onClick(() => {
         if (currentModalId) {
-          sendConsultRequest();
-        }      });
+          sendConsultRequest();        }
+      });
     }
    
   } catch (error) {
@@ -193,7 +194,6 @@ function renderWelcome() {
   if (titleEl) titleEl.textContent = config.brand.welcomeTitle || '';
   if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
 }
-
 // ✅ ФИЛЬТРЫ
 function renderFilters() {
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
@@ -237,22 +237,23 @@ function renderFilters() {
     });
   }
  
-  document.querySelectorAll('.filter-checkbox').forEach(function(cb) {
+  document.querySelectorAll('.filter-checkbox').forEach(cb => {
     cb.addEventListener('change', filterListings);
   });
 }
+
 // 🔍 ФИЛЬТРАЦИЯ
-function filterListings() {
-  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500); 
+function filterListings() {  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
+ 
   const selectedDistricts = Array.from(
     document.querySelectorAll('input[data-filter="district"]:checked')
-  ).map(function(cb) { return cb.value; });
+  ).map(cb => cb.value);
  
   const selectedMetros = Array.from(
     document.querySelectorAll('input[data-filter="metro"]:checked')
-  ).map(function(cb) { return cb.value; });
+  ).map(cb => cb.value);
  
-  const filtered = listings.filter(function(item) {
+  const filtered = listings.filter(item => {
     if (!item.active) return false;
     if (typeof item.price_from !== 'number') return false;
     if (item.price_from > maxPrice) return false;
@@ -276,7 +277,7 @@ function renderListings(data) {
     return;
   }
  
-  data.forEach(function(item) {
+  data.forEach(item => {
     const price = typeof item.price_from === 'number' ? item.price_from.toFixed(1) : '?';
     const ppsqm = typeof item.price_per_sqm === 'number'
       ? Math.round(item.price_per_sqm).toLocaleString('ru-RU')
@@ -291,8 +292,8 @@ function renderListings(data) {
    
     const card = document.createElement('div');
     card.className = 'listing-card';
-    card.onclick = function() { openDetails(item.id); };
-        card.innerHTML = '<img src="' + (escapeHtml(item.image_main) || '') + '" alt="' + (escapeHtml(item.name) || '') + '" class="listing-image" onerror="this.style.display=\'none\'"><div class="listing-info"><h3>' + (escapeHtml(item.name) || 'Без названия') + '</h3><div class="listing-meta"><span>' + (escapeHtml(item.district) || '') + '</span><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="listing-price">от ' + price + ' млн ₽' + (ppsqm ? '<span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '') + '</div><div class="listing-status status-' + statusKey + '">' + statusText + '</div></div>';
+    card.onclick = () => openDetails(item.id);   
+    card.innerHTML = '<img src="' + (escapeHtml(item.image_main) || '') + '" alt="' + (escapeHtml(item.name) || '') + '" class="listing-image" onerror="this.style.display=\'none\'"><div class="listing-info"><h3>' + (escapeHtml(item.name) || 'Без названия') + '</h3><div class="listing-meta"><span>' + (escapeHtml(item.district) || '') + '</span><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="listing-price">от ' + price + ' млн ₽' + (ppsqm ? '<span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '') + '</div><div class="listing-status status-' + statusKey + '">' + statusText + '</div></div>';
    
     container.appendChild(card);
   });
@@ -300,7 +301,7 @@ function renderListings(data) {
 
 // 🔍 ДЕТАЛИ ОБЪЕКТА
 function openDetails(id) {
-  const item = listings.find(function(l) { return l.id === id; });
+  const item = listings.find(l => l.id === id);
   if (!item) return;
  
   currentModalId = id;
@@ -320,8 +321,8 @@ function openDetails(id) {
  
   const featuresDiv = document.getElementById('modalFeatures');
   if (item.features) {
-    const featuresList = item.features.split(',').map(function(f) { return f.trim(); }).filter(Boolean);
-    featuresDiv.innerHTML = '<ul>' + featuresList.map(function(f) { return '<li>' + escapeHtml(f) + '</li>'; }).join('') + '</ul>';
+    const featuresList = item.features.split(',').map(f => f.trim()).filter(Boolean);
+    featuresDiv.innerHTML = '<ul>' + featuresList.map(f => '<li>' + escapeHtml(f) + '</li>').join('') + '</ul>';
   } else {
     featuresDiv.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
@@ -339,13 +340,13 @@ function openDetails(id) {
   if (item.floor_plans_images) {
     const galleryDiv = document.createElement('div');
     galleryDiv.className = 'floor-plans-gallery';
-    const urls = item.floor_plans_images.split(',').map(function(u) { return u.trim(); }).filter(Boolean);
-   
-    urls.forEach(function(url) {      const img = document.createElement('img');
+    const urls = item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean);
+        urls.forEach(url => {
+      const img = document.createElement('img');
       img.src = url;
       img.className = 'floor-plan-image';
       img.alt = 'Планировка';
-      img.onclick = function() { window.open(url, '_blank'); };
+      img.onclick = () => window.open(url, '_blank');
       galleryDiv.appendChild(img);
     });
    
@@ -367,12 +368,12 @@ function openDetails(id) {
   }
  
   if (item.images_gallery) {
-    const urls = item.images_gallery.split(',').map(function(u) { return u.trim(); }).filter(Boolean);
-    urls.forEach(function(url) {
+    const urls = item.images_gallery.split(',').map(u => u.trim()).filter(Boolean);
+    urls.forEach(url => {
       const img = document.createElement('img');
       img.src = url;
       img.className = 'modal-thumb';
-      img.onclick = function() { window.open(url, '_blank'); };
+      img.onclick = () => window.open(url, '_blank');
       gallery.appendChild(img);
     });
   }
@@ -389,28 +390,83 @@ function closeModal() {
   document.getElementById('detailsModal').classList.add('hidden');
   document.body.style.overflow = '';
   currentModalId = null;
- 
-  if (tg && tg.MainButton) {    tg.MainButton.hide();
+    if (tg && tg.MainButton) {
+    tg.MainButton.hide();
   }
 }
 
+// 📞 ФОРМА КОНСУЛЬТАЦИИ (НОВАЯ)
 function sendConsultRequest() {
-  if (!currentModalId) return;
- 
-  const item = listings.find(function(l) { return l.id === currentModalId; });
+  const item = listings.find(l => l.id === currentModalId);
   if (!item) return;
  
-  const message = {
-    action: 'consult_request',
-    objectId: item.id,
-    objectName: item.name,
-    timestamp: new Date().toISOString()
-  };
+  // Показываем название объекта в форме
+  const objNameEl = document.getElementById('consultObjectName');
+  if (objNameEl) objNameEl.textContent = '🏢 ' + item.name;
  
-  tg.sendData(JSON.stringify(message));
-  tg.showAlert('✅ Заявка по ЖК "' + item.name + '" отправлена!');
+  // Автозаполнение имени из Telegram
+  const user = tg?.initDataUnsafe?.user || {};
+  const nameInput = document.getElementById('consultName');
+  if (nameInput && user.first_name) {
+    nameInput.value = (user.first_name + ' ' + (user.last_name || '')).trim();
+  }
  
-  closeModal();
+  // Открываем модалку с формой
+  document.getElementById('consultModal').classList.remove('hidden');
+}
+
+function closeConsultModal() {
+  document.getElementById('consultModal').classList.add('hidden');
+  document.getElementById('consultForm').reset();
+}
+
+function submitConsultForm(event) {
+  event.preventDefault();
+ 
+  const item = listings.find(l => l.id === currentModalId);
+  if (!item) return;
+ 
+  const name = document.getElementById('consultName').value;
+  const phone = document.getElementById('consultPhone').value;
+ 
+  // ⚠️ ВАЖНО: Вставь сюда свои данные!
+  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM
+
+';
+  const CHAT_ID = '2038206387';
+ 
+  // Короткое сообщение, как ты просил
+  const text = 'Новая заявка ЖК: ' + item.name + '\n\n👤 ' + name + '\n📱 ' + phone;
+ 
+  // Блокируем кнопку
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Отправка...';  submitBtn.disabled = true;
+ 
+  // Отправляем в Telegram
+  fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.ok) {
+      closeConsultModal();
+      if (tg?.showAlert) tg.showAlert('✅ Заявка отправлена!');
+      event.target.reset();
+    } else {
+      if (tg?.showAlert) tg.showAlert('❌ Ошибка: ' + data.description);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    if (tg?.showAlert) tg.showAlert('❌ Ошибка сети');
+  })
+  .finally(() => {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  });
 }
 
 function initMap() {
