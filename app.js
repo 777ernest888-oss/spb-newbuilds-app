@@ -1,112 +1,67 @@
-// 🛡 1. БЕЗОПАСНАЯ ИНИЦИАЛИЗАЦИЯ TELEGRAM WEBAPP
+// 🛡 ИНИЦИАЛИЗАЦИЯ
 let tg;
 try {
   if (window.Telegram && window.Telegram.WebApp) {
     tg = window.Telegram.WebApp;
     tg.ready();
-    tg.expand(); // Раскрываем на весь экран
+    tg.expand();
   } else {
-    // Заглушка для браузера (чтобы не падало при тесте в Chrome)
     tg = {
-      ready: () => {},
-      expand: () => {},
-      MainButton: { setText: () => {}, show: () => {}, onClick: () => {} },
-      showAlert: (msg) => alert(msg),
-      sendData: (data) => console.log('sendData:', data),
-      close: () => {}
+      ready: () => {}, expand: () => {},
+      MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {} },
+      showAlert: (msg) => alert(msg), sendData: (data) => console.log('sendData:', data), close: () => {}
     };
-    console.warn('️ Запущено вне Telegram. SDK эмулируется.');
   }
-} catch (e) {
-  console.error('Ошибка инициализации TG SDK:', e);
-}
+} catch (e) { console.error('TG Init Error:', e); }
 
 let config = {};
 let listings = [];
+let currentModalId = null;
 
-// 🚀 2. ГЛАВНАЯ ФУНКЦИЯ ЗАПУСКА
+//  INIT
 async function init() {
   try {
-    // А. Загружаем конфиг
     const configRes = await fetch('config.json');
-    if (!configRes.ok) throw new Error('Не найден config.json');
     config = await configRes.json();
-
-    // Б. Загружаем данные из таблицы
+   
     if (config.data?.source === 'google_sheets' && config.data?.sheetUrl) {
       listings = await loadFromGoogleSheets(config.data.sheetUrl);
-      console.log(`✅ Загружено объектов: ${listings.length}`);
-    } else {
-      console.warn('⚠️ Ссылка на таблицу не настроена в config.json');
     }
-
-    // В. Отрисовываем интерфейс
+   
     applyTheme();
     renderWelcome();
     renderFilters();
     renderListings(listings.filter(l => l.active));
-
-    // Г. Настраиваем кнопку Telegram
-    tg.MainButton.setText(config.texts?.ctaButton || 'Отправить заявку');    tg.MainButton.show();
-    tg.MainButton.onClick(() => {
-      // Здесь можно добавить логику открытия формы
-      tg.showAlert('Спасибо! Заявка будет отправлена (демо-режим).');
-    });
-
-  } catch (error) {
-    console.error('Критическая ошибка запуска:', error);
-    document.body.innerHTML = `<div style="padding:20px; text-align:center; color:red;">
-      <h3>Ошибка загрузки</h3>
-      <p>${error.message}</p>
-      <button onclick="location.reload()">Обновить</button>
-    </div>`;
-  }
-}
-
-//  3. УМНАЯ ЗАГРУЗКА GOOGLE SHEETS
-async function loadFromGoogleSheets(url) {
-  try {
-    // Превращаем ссылку pubhtml в ссылку на CSV
-    // Было: .../pubhtml?gid=0&single=true
-    // Стало: .../pub?gid=0&output=csv&single=true
-    let csvUrl = url.replace('pubhtml', 'pub');
-    if (!csvUrl.includes('output=csv')) {
-      csvUrl += (csvUrl.includes('?') ? '&' : '?') + 'output=csv';
-    }
-
-    const response = await fetch(csvUrl);
-    if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
    
-    const csvText = await response.text();
-    return parseCSV(csvText);
+    tg.MainButton.setText(config.texts?.ctaButton || 'Отправить заявку');
+    tg.MainButton.hide();
+   
   } catch (error) {
-    console.error('Ошибка чтения таблицы:', error);
-    return []; // Возвращаем пустой массив, чтобы приложение не упало
+    console.error('Init Error:', error);
   }
 }
 
-// 🔍 4. НАДЕЖНЫЙ ПАРСЕР CSV
+// 📥 GOOGLE SHEETS LOADER
+async function loadFromGoogleSheets(url) {
+  let csvUrl = url.replace('pubhtml', 'pub') + (url.includes('output=csv') ? '' : '&output=csv');
+  const response = await fetch(csvUrl);
+  const csvText = await response.text();
+  return parseCSV(csvText);
+}
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
   if (lines.length < 2) return [];
-
-  // Чистим заголовки от лишних пробелов и кавычек
   const headers = parseCSVLine(lines[0]).map(h => h.trim());
   const result = [];
-
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
-        const values = parseCSVLine(lines[i]);
+    const values = parseCSVLine(lines[i]);
     const obj = {};
-   
     headers.forEach((header, index) => {
       let value = values[index] !== undefined ? values[index].trim() : '';
-     
-      // Конвертация типов данных
       if (value === 'TRUE') value = true;
       else if (value === 'FALSE') value = false;
       else if (!isNaN(value) && value !== '') value = Number(value);
-     
       obj[header] = value;
     });
     result.push(obj);
@@ -115,69 +70,92 @@ function parseCSV(csv) {
 }
 
 function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
- 
+  const result = []; let current = ''; let inQuotes = false;
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
     if (char === '"') inQuotes = !inQuotes;
-    else if (char === ',' && !inQuotes) {
-      result.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
+    else if (char === ',' && !inQuotes) { result.push(current); current = ''; }
+    else current += char;
   }
   result.push(current);
   return result;
 }
 
-// 🎨 5. ПРИМЕНЕНИЕ ТЕМЫ
+// 🎨 THEME & WELCOME
 function applyTheme() {
   if (!config.brand) return;
   document.documentElement.style.setProperty('--primary', config.brand.primaryColor || '#1a365d');
   document.documentElement.style.setProperty('--accent', config.brand.accentColor || '#d4af37');
-
   const img = document.getElementById('welcomeImage');
   if (img && config.brand.welcomeImage) img.src = config.brand.welcomeImage;
 }
 
-// 🖼 6. РЕНДЕР WELCOME
 function renderWelcome() {
-  if (!config.features?.showWelcomeScreen) return; 
+  if (!config.features?.showWelcomeScreen) return;
   document.getElementById('welcomeTitle').textContent = config.brand.welcomeTitle || '';
   document.getElementById('welcomeSubtitle').textContent = config.brand.welcomeSubtitle || '';
-
   document.getElementById('startBtn').addEventListener('click', () => {
     document.getElementById('welcomeScreen').classList.add('hidden');
-    document.getElementById('mainContent').classList.remove('hidden');
-    tg.MainButton.show();
-  });
+    document.getElementById('mainContent').classList.remove('hidden');  });
 }
 
-//  7. РЕНДЕР ФИЛЬТРОВ
+// ✅ FILTERS
 function renderFilters() {
-  const priceInput = document.getElementById('priceFilter');
-  const priceLabel = document.getElementById('priceValue');
- 
-  if (priceInput && priceLabel) {
-    const max = config.filters?.defaults?.maxPrice || 500;
-    priceInput.max = max;
-    priceInput.value = max;
-    priceLabel.textContent = max;
+  const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
+  const districtContainer = document.getElementById('districtCheckboxes');
+  districtContainer.innerHTML = '';
+  districts.forEach(d => {
+    const label = document.createElement('label');
+    label.className = 'checkbox-label';
+    label.innerHTML = `<input type="checkbox" value="${d}" class="filter-checkbox" data-filter="district"> ${d}`;
+    districtContainer.appendChild(label);
+  });
 
-    priceInput.addEventListener('input', (e) => {
-      priceLabel.textContent = e.target.value;
+  const metros = [...new Set(listings.map(l => l.metro).filter(Boolean))].sort();
+  const metroContainer = document.getElementById('metroCheckboxes');
+  metroContainer.innerHTML = '';
+  metros.forEach(m => {
+    const label = document.createElement('label');
+    label.className = 'checkbox-label';
+    label.innerHTML = `<input type="checkbox" value="${m}" class="filter-checkbox" data-filter="metro"> ${m}`;
+    metroContainer.appendChild(label);
+  });
+
+  const priceFilter = document.getElementById('priceFilter');
+  const priceValue = document.getElementById('priceValue');
+  if (priceFilter) {
+    priceFilter.max = config.filters?.defaults?.maxPrice || 500;
+    priceFilter.value = priceFilter.max;
+    priceValue.textContent = priceFilter.value;
+    priceFilter.addEventListener('input', (e) => {
+      priceValue.textContent = e.target.value;
       filterListings();
     });
   }
+
+  document.querySelectorAll('.filter-checkbox').forEach(cb => {
+    cb.addEventListener('change', filterListings);
+  });
 }
 
-//  8. РЕНДЕР КАРТОЧЕК (с защитой от ошибок)
+function filterListings() {
+  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
+  const selectedDistricts = Array.from(document.querySelectorAll('input[data-filter="district"]:checked')).map(cb => cb.value);
+  const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);
+
+  const filtered = listings.filter(item => {
+    if (!item.active) return false;
+    if (typeof item.price_from !== 'number') return false;    if (item.price_from > maxPrice) return false;
+    if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
+    if (selectedMetros.length > 0 && !selectedMetros.includes(item.metro)) return false;
+    return true;
+  });
+  renderListings(filtered);
+}
+
+//  RENDER LISTINGS
 function renderListings(data) {
   const container = document.getElementById('listingsContainer');
-  if (!container) return;
   container.innerHTML = '';
 
   if (!data || data.length === 0) {
@@ -186,18 +164,17 @@ function renderListings(data) {
   }
 
   data.forEach(item => {
-    // Защита от отсутствующих данных
     const price = typeof item.price_from === 'number' ? item.price_from.toFixed(1) : '?';
     const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString() : '';
-   
-    // Исправление пробелов в CSS классе статуса
     const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');
-    let statusBadge = item.status || '';
-    if (item.status === 'Сдан') statusBadge = '✅ Сдан';
-    if (item.status === 'Строится') statusBadge = '🏗 Строится';    if (item.status === 'Частично сдан') statusBadge = '🟡 Частично сдан';
+    let statusText = item.status || '';
+    if (item.status === 'Сдан') statusText = '✅ Сдан';
+    if (item.status === 'Строится') statusText = '🏗 Строится';
+    if (item.status === 'Частично сдан') statusText = '🟡 Частично сдан';
 
     const card = document.createElement('div');
     card.className = 'listing-card';
+    card.onclick = () => openDetails(item.id);
     card.innerHTML = `
       <img src="${item.image_main || ''}" alt="${item.name || ''}" class="listing-image" onerror="this.style.display='none'">
       <div class="listing-info">
@@ -205,31 +182,102 @@ function renderListings(data) {
         <div class="listing-meta">
           <span>${item.district || ''}</span>
           <span>🚇 ${item.metro || ''}</span>
-          <span>${item.class || ''}</span>
         </div>
         <div class="listing-price">
           от ${price} млн ₽
           ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}
         </div>
-        <div class="listing-status status-${statusKey}">${statusBadge}</div>
-        <div class="listing-address">📍 ${item.address || ''}</div>
+        <div class="listing-status status-${statusKey}">${statusText}</div>
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// 🔎 9. ФИЛЬТРАЦИЯ
-function filterListings() {
-  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
+// 🔍 MODAL DETAILS (ОБНОВЛЕННАЯ ФУНКЦИЯ)function openDetails(id) {
+  const item = listings.find(l => l.id === id);
+  if (!item) return;
  
-  const filtered = listings.filter(item => {
-    // Показываем только активные объекты, у которых есть цена и она входит в диапазон
-    return item.active && typeof item.price_from === 'number' && item.price_from <= maxPrice;
-  });
+  currentModalId = id;
+  document.getElementById('modalTitle').textContent = item.name;
+  document.getElementById('modalPrice').innerHTML = `от <b>${item.price_from}</b> млн ₽ <span class="price-per-sqm">~${Math.round(item.price_per_sqm)} ₽/м²</span>`;
+  document.getElementById('modalMeta').innerHTML = `
+    <div class="meta-row"><span>📍 ${item.address || ''}</span></div>
+    <div class="meta-row"><span>🚇 ${item.metro || ''}</span></div>
+    <div class="meta-row"><span>🏗 ${item.class || ''} • ${item.finishing || ''}</span></div>
+    <div class="meta-row"><span>📅 ${item.completion_all || item.completion_soonest}</span></div>
+  `;
+  document.getElementById('modalDescription').textContent = item.description || 'Описание отсутствует';
+  document.getElementById('modalFeatures').innerHTML = item.features ? `<ul>${item.features.split(',').map(f => `<li>${f.trim()}</li>`).join('')}</ul>` : '';
+
+  // ЛОГИКА ПЛАНИРОВОК (Текст + Картинки)
+  const plansContainer = document.getElementById('modalFloorPlans');
+  plansContainer.innerHTML = '';
  
-  renderListings(filtered);
+  if (item.floor_plans_text) {
+    const textDiv = document.createElement('div');
+    textDiv.className = 'floor-plans-text';
+    textDiv.textContent = item.floor_plans_text;
+    plansContainer.appendChild(textDiv);
+  }
+ 
+  if (item.floor_plans_images) {
+    const galleryDiv = document.createElement('div');
+    galleryDiv.className = 'floor-plans-gallery';
+    const urls = item.floor_plans_images.split(',').map(u => u.trim());
+    urls.forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'floor-plan-image';
+      img.alt = 'Планировка';
+      img.onclick = () => window.open(url, '_blank');
+      galleryDiv.appendChild(img);
+    });
+    plansContainer.appendChild(galleryDiv);
+  }
+ 
+  if (!item.floor_plans_text && !item.floor_plans_images) {
+    plansContainer.innerHTML = '<p style="color:#718096;">Информация уточняется</p>';
+  }
+
+  // Gallery основного ЖК
+  const gallery = document.getElementById('modalGallery');
+  gallery.innerHTML = '';
+  if (item.image_main) {    const img = document.createElement('img');
+    img.src = item.image_main;
+    img.className = 'modal-main-image';
+    gallery.appendChild(img);
+  }
+  if (item.images_gallery) {
+    const urls = item.images_gallery.split(',').map(u => u.trim());
+    urls.forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'modal-thumb';
+      gallery.appendChild(img);
+    });
+  }
+
+  document.getElementById('detailsModal').classList.remove('hidden');
+  tg.MainButton.show();
 }
 
-// ▶️ ЗАПУСК
+function closeModal() {
+  document.getElementById('detailsModal').classList.add('hidden');
+  tg.MainButton.hide();
+  currentModalId = null;
+}
+
+function sendConsultRequest() {
+  if (!currentModalId) return;
+  const item = listings.find(l => l.id === currentModalId);
+  tg.sendData(JSON.stringify({
+    action: 'consult_request',
+    objectId: item.id,
+    objectName: item.name
+  }));
+  tg.showAlert(`Заявка по ЖК "${item.name}" отправлена!`);
+  closeModal();
+}
+
 init();
