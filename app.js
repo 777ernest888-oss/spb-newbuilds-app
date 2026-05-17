@@ -243,7 +243,7 @@ function renderWelcome() {
   }
  
   document.querySelectorAll('.filter-checkbox').forEach(cb => {
-    cb.addEventListener('change', filterListings);  });
+    cb.addEventListener('change', filterListings);
 }
 
 // 🔍 ФИЛЬТРАЦИЯ
