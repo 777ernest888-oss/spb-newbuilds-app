@@ -18,20 +18,27 @@
 
   <!-- Main Content -->
   <div id="mainContent" class="hidden">
-    <!-- Filters -->
-    <div class="filters" id="filtersContainer">
-      <div class="filter-group">
-        <label>Район:</label>
-        <div id="districtCheckboxes" class="checkbox-group"></div>
-      </div>
-      <div class="filter-group">
-        <label>Метро:</label>
-        <div id="metroCheckboxes" class="checkbox-group"></div>
-      </div>
-      <div class="filter-group">
-        <label>Цена до (млн ₽):</label>
-        <input type="range" id="priceFilter" min="0" max="500" step="1" value="500">
-        <div class="range-value"><span id="priceValue">500</span> млн ₽</div>
+    <!-- Filters Toggle Button -->
+    <button class="tg-btn filters-toggle-btn" onclick="toggleFilters()">
+      🔽 Фильтры
+    </button>
+
+    <!-- Filters Block (collapsible) -->
+    <div id="filtersBlock" class="hidden">
+      <div class="filters" id="filtersContainer">
+        <div class="filter-group">
+          <label>Район:</label>
+          <div id="districtCheckboxes" class="checkbox-group"></div>
+        </div>
+        <div class="filter-group">
+          <label>Метро:</label>
+          <div id="metroCheckboxes" class="checkbox-group"></div>
+        </div>
+        <div class="filter-group">
+          <label>Цена до (млн ₽):</label>
+          <input type="range" id="priceFilter" min="0" max="500" step="1" value="500">
+          <div class="range-value"><span id="priceValue">500</span> млн ₽</div>
+        </div>
       </div>
     </div>
 
@@ -74,8 +81,6 @@
           <h3>Планировки</h3>
           <div id="modalFloorPlans"></div>
         </div>
-       
-        <button class="tg-btn modal-cta" onclick="sendConsultRequest()">Получить консультацию</button>
       </div>
     </div>
   </div>
