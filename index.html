@@ -47,7 +47,6 @@
       <button id="listViewBtn" class="active" onclick="switchView('list')">📋 Список</button>
       <button id="mapViewBtn" onclick="switchView('map')">🗺 Карта</button>
     </div>
-
     <!-- Listings Container -->
     <div id="listingsContainer"></div>
 
@@ -82,6 +81,30 @@
           <div id="modalFloorPlans"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal for Consultation Form -->
+  <div id="consultModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 400px; margin: 50px auto; padding: 30px;">
+      <div class="modal-header">
+        <h2>📞 Заказать консультацию</h2>
+        <button class="close-btn" onclick="closeConsultModal()">✕</button>
+      </div>
+      <p style="margin-bottom: 20px; color: var(--text-secondary);">
+        Оставьте контакты — мы перезвоним и ответим на все вопросы по объекту
+      </p>
+      <div id="consultObjectName" style="margin-bottom: 20px; padding: 12px; background: var(--bg); border-radius: 8px; font-weight: 600;"></div>
+      <form id="consultForm" onsubmit="submitConsultForm(event)">
+        <div style="margin-bottom: 16px;">          <label style="display: block; margin-bottom: 8px; font-weight: 600;">Ваше имя *</label>
+          <input type="text" id="consultName" required style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 16px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600;">Телефон *</label>
+          <input type="tel" id="consultPhone" required placeholder="+7 (___) ___-__-__" style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 16px;">
+        </div>
+        <button type="submit" class="tg-btn" style="width: 100%;">Отправить заявку</button>
+      </form>
     </div>
   </div>
 
