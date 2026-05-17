@@ -23,7 +23,7 @@ let config = {};
 let listings = [];
 let currentModalId = null;
 
-// ✅ ГЛОБАЛЬНАЯ ФУНКЦИЯ ПЕРЕХОДА (для кнопки на стартовом экране)
+// ✅ ГЛОБАЛЬНАЯ ФУНКЦИЯ ПЕРЕХОДА
 function startApp() {
   const welcome = document.getElementById('welcomeScreen');
   const main = document.getElementById('mainContent');
@@ -38,7 +38,7 @@ function startApp() {
   window.scrollTo(0, 0);
 }
 
-//  СВЕРНУТЬ/РАЗВЕРНУТЬ ФИЛЬТРЫ
+// 🔽 СВЕРНУТЬ/РАЗВЕРНУТЬ ФИЛЬТРЫ
 function toggleFilters() {
   const block = document.getElementById('filtersBlock');
   const btn = document.querySelector('.filters-toggle-btn');
@@ -52,7 +52,7 @@ function toggleFilters() {
   }
 }
 
-// 🔄 ПЕРЕКЛЮЧЕНИЕ ВИДА (Список/Карта)
+// 🔄 ПЕРЕКЛЮЧЕНИЕ ВИДА
 function switchView(view) {
   const listBtn = document.getElementById('listViewBtn');
   const mapBtn = document.getElementById('mapViewBtn');
@@ -194,7 +194,7 @@ function renderWelcome() {
   if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
 }
 
-// ✅ ФИЛЬТРЫfunction renderFilters() {
+// ✅ ФИЛЬТРЫ (ПРОВЕРЕНО ВРУЧНУЮ!)function renderFilters() {
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
   const districtContainer = document.getElementById('districtCheckboxes');
  
@@ -246,6 +246,7 @@ function renderWelcome() {
     cb.addEventListener('change', filterListings);  });
 }
 
+// 🔍 ФИЛЬТРАЦИЯ
 function filterListings() {
   const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
  
@@ -291,8 +292,8 @@ function renderListings(data) {
       ? Math.round(item.price_per_sqm).toLocaleString('ru-RU')
       : '';
    
-    const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');
-    let statusText = item.status || '';   
+    const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');    let statusText = item.status || '';
+   
     if (item.status === 'Сдан') statusText = '✅ Сдан';
     else if (item.status === 'Строится') statusText = '🏗 Строится';
     else if (item.status === 'Частично сдан') statusText = '🟡 Частично сдан';
@@ -324,7 +325,7 @@ function renderListings(data) {
   });
 }
 
-//  ДЕТАЛИ ОБЪЕКТА
+// 🔍 ДЕТАЛИ ОБЪЕКТА
 function openDetails(id) {
   const item = listings.find(l => l.id === id);
   if (!item) return;
@@ -340,12 +341,12 @@ function openDetails(id) {
  
   document.getElementById('modalPrice').innerHTML = `
     от <b>${price}</b> млн ₽
-    ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}
-  `; 
+    ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}  `;
+ 
   document.getElementById('modalMeta').innerHTML = `
     <div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div>
     <div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div>
-    <div class="meta-row"><span> ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div>
+    <div class="meta-row"><span>🏗 ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div>
     <div class="meta-row"><span>📅 ${escapeHtml(item.completion_all || item.completion_soonest) || ''}</span></div>
   `;
  
@@ -389,8 +390,8 @@ function openDetails(id) {
   if (!item.floor_plans_text && !item.floor_plans_images) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
- 
-  const gallery = document.getElementById('modalGallery');  gallery.innerHTML = '';
+    const gallery = document.getElementById('modalGallery');
+  gallery.innerHTML = '';
  
   if (item.image_main) {
     const mainImg = document.createElement('img');
@@ -438,8 +439,8 @@ function sendConsultRequest() {
     action: 'consult_request',
     objectId: item.id,
     objectName: item.name,
-    timestamp: new Date().toISOString()
-  }; 
+    timestamp: new Date().toISOString()  };
+ 
   tg.sendData(JSON.stringify(message));
   tg.showAlert(`✅ Заявка по ЖК "${item.name}" отправлена!`);
  
@@ -460,7 +461,7 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-//  ЗАПУСК
+// 🚀 ЗАПУСК
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
