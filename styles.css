@@ -309,14 +309,22 @@ input[type="range"]::-moz-range-thumb {
 
 /* Кнопка консультации в карточке */
 .consult-btn-inline {
-  margin-top: 12px;
+  margin-top: 16px;
   width: 100%;
   padding: 14px;
   font-size: 15px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .consult-btn-inline:active {
   transform: scale(0.98);
+  opacity: 0.9;
 }
 
 /* Modal */
@@ -333,15 +341,15 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .modal-content {
-  background: white;
-  min-height: 100%;
+  background: white;   min-height: 100%;
   padding: 20px;
   position: relative;
   animation: slideUp 0.3s ease-out;
 }
 
 @keyframes slideUp {
-  from {    transform: translateY(100%);
+  from {
+    transform: translateY(100%);
   }
   to {
     transform: translateY(0);
@@ -383,14 +391,14 @@ input[type="range"]::-moz-range-thumb {
   background: #f7fafc;
   color: var(--text);
 }
-
 .modal-gallery {
   display: flex;
   gap: 10px;
   overflow-x: auto;
   margin-bottom: 20px;
   padding-bottom: 10px;
-  -webkit-overflow-scrolling: touch;}
+  -webkit-overflow-scrolling: touch;
+}
 
 .modal-main-image {
   width: 100%;
@@ -431,15 +439,15 @@ input[type="range"]::-moz-range-thumb {
 .meta-row {
   margin-bottom: 8px;
   font-size: 15px;
-  color: var(--text-secondary);
-  display: flex;
+  color: var(--text-secondary);  display: flex;
   align-items: center;
 }
 
 .meta-row span {
   display: flex;
   align-items: center;
-  gap: 6px;}
+  gap: 6px;
+}
 
 .modal-section {
   margin: 20px 0;
@@ -480,15 +488,15 @@ input[type="range"]::-moz-range-thumb {
 
 /* Consult Form Modal */
 #consultModal .modal-content {
-  max-width: 400px;
-  margin: 50px auto;
+  max-width: 400px;  margin: 50px auto;
   padding: 30px;
   border-radius: 16px;
 }
 
 #consultForm input {
   width: 100%;
-  padding: 12px;  border: 2px solid var(--border);
+  padding: 12px;
+  border: 2px solid var(--border);
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.2s;
@@ -529,8 +537,7 @@ input[type="range"]::-moz-range-thumb {
 
 .floor-plan-image {
   width: 100%;
-  height: auto;
-  aspect-ratio: 4/3;
+  height: auto;   aspect-ratio: 4/3;
   object-fit: contain;
   border-radius: 8px;
   cursor: pointer;
@@ -538,6 +545,7 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.2s;
   background: white;
 }
+
 .floor-plan-image:hover {
   border-color: var(--primary);
   transform: translateY(-2px);
@@ -578,15 +586,15 @@ input[type="range"]::-moz-range-thumb {
   color: var(--text-secondary);
 }
 
-.loading::after {
-  content: '';
+.loading::after {  content: '';
   width: 24px;
   height: 24px;
   border: 3px solid var(--border);
   border-top-color: var(--primary);
   border-radius: 50%;
   margin-left: 12px;
-  animation: spin 0.8s linear infinite;}
+  animation: spin 0.8s linear infinite;
+}
 
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -627,5 +635,4 @@ input[type="range"]::-moz-range-thumb {
   .view-toggle,
   .tg-btn {
     display: none !important;
-  }
-}
+  }}
