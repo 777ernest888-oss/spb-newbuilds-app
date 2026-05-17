@@ -194,7 +194,8 @@ function renderWelcome() {
   if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
 }
 
-// ✅ ФИЛЬТРЫfunction renderFilters() {
+/ ✅ ФИЛЬТРЫ
+function renderFilters() {
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
   const districtContainer = document.getElementById('districtCheckboxes');
  
@@ -240,7 +241,6 @@ function renderWelcome() {
     cb.addEventListener('change', filterListings);
   });
 }
-
 // 🔍 ФИЛЬТРАЦИЯ
 function filterListings() {
   const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500); 
