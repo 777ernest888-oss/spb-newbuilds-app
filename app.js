@@ -430,9 +430,7 @@ function submitConsultForm(event) {
   const phone = document.getElementById('consultPhone').value;
  
   // ⚠️ ВАЖНО: Вставь сюда свои данные!
-  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM
-
-';
+  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
   const CHAT_ID = '2038206387';
  
   // Короткое сообщение, как ты просил
