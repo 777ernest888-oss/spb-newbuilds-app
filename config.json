@@ -9,7 +9,7 @@
   },
   "data": {
     "source": "google_sheets",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAJn5ah-8UjagF2CloZWriSpKLyMkD5RxLzYOHC7PCtcCe33iTs5NvqM2dLs8QLCuMIrklOytKOPWy/pubhtml?gid=0&single=true",
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAJn5ah-8UjagF2CloZWriSpKLyMkD5RxLzYOHC7PCtcCe33iTs5NvqM2dLs8QLCuMIrklOytKOPWy/pub?gid=0&single=true&output=csv",
     "activeColumn": "active"
   },
   "filters": {
@@ -34,7 +34,7 @@
   "texts": {
     "ctaButton": "Получить консультацию",
     "emptyState": "Нет объектов по заданным фильтрам. Попробуйте расширить поиск.",
-    "mapToggle": "🗺 Карта",
-    "listToggle": "📋 Список"
+    "mapToggle": " Карта",
+    "listToggle": " Список"
   }
 }
