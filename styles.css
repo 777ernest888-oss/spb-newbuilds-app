@@ -28,53 +28,54 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Welcome Screen */
+/* Welcome Screen - OPTIMIZED */
 #welcomeScreen {
   text-align: center;
-  padding: 40px 20px;
+  padding: 20px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 20px;
 }
 
 .welcome-image {
   width: 90%;
-  max-width: 350px;
-  height: 600px;
+  max-width: 300px;
+  height: 400px; /* Уменьшено с 600px */
   object-fit: cover;
   border-radius: 16px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+  margin-bottom: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);}
+
 #welcomeTitle {
-  font-size: 28px;
+  font-size: 24px; /* Уменьшено с 28px */
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: var(--primary);
   line-height: 1.2;
 }
 
 #welcomeSubtitle {
-  font-size: 16px;
+  font-size: 15px; /* Уменьшено с 16px */
   color: var(--text-secondary);
-  margin-bottom: 40px;
-  line-height: 1.6;
-  max-width: 400px;
+  margin-bottom: 24px; /* Уменьшено с 40px */
+  line-height: 1.5;
+  max-width: 320px;
 }
 
 .tg-btn {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 16px 32px;
+  padding: 14px 28px; /* Компактнее */
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   width: 100%;
-  max-width: 320px;
+  max-width: 280px; /* Уже */
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(26, 54, 93, 0.3);
 }
@@ -144,8 +145,8 @@ body {
   background: #e2e8f0;
 }
 
-.checkbox-label input[type="checkbox"] {
-  margin-right: 6px;  width: 16px;
+.checkbox-label input[type="checkbox"] {   margin-right: 6px;
+  width: 16px;
   height: 16px;
   cursor: pointer;
   accent-color: var(--primary);
@@ -193,8 +194,8 @@ input[type="range"]::-moz-range-thumb {
 
 .range-value {
   font-weight: 700;
-  color: var(--primary);
-  margin-top: 8px;  font-size: 16px;
+  color: var(--primary);   margin-top: 8px;
+  font-size: 16px;
 }
 
 /* View Toggle */
@@ -242,8 +243,8 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
-.listing-image {
-  width: 100%;   height: 200px;
+.listing-image {   width: 100%;
+  height: 200px;
   object-fit: cover;
   background: #e2e8f0;
 }
@@ -340,8 +341,8 @@ input[type="range"]::-moz-range-thumb {
   -webkit-overflow-scrolling: touch;
 }
 
-.modal-content {
-  background: white;   min-height: 100%;
+.modal-content {   background: white;
+  min-height: 100%;
   padding: 20px;
   position: relative;
   animation: slideUp 0.3s ease-out;
@@ -389,8 +390,8 @@ input[type="range"]::-moz-range-thumb {
 
 .close-btn:hover {
   background: #f7fafc;
-  color: var(--text);
-}
+  color: var(--text);}
+
 .modal-gallery {
   display: flex;
   gap: 10px;
@@ -438,8 +439,8 @@ input[type="range"]::-moz-range-thumb {
 
 .meta-row {
   margin-bottom: 8px;
-  font-size: 15px;
-  color: var(--text-secondary);  display: flex;
+  font-size: 15px;   color: var(--text-secondary);
+  display: flex;
   align-items: center;
 }
 
@@ -487,8 +488,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Consult Form Modal */
-#consultModal .modal-content {
-  max-width: 400px;  margin: 50px auto;
+#consultModal .modal-content {  max-width: 400px;
+  margin: 50px auto;
   padding: 30px;
   border-radius: 16px;
 }
@@ -536,8 +537,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .floor-plan-image {
-  width: 100%;
-  height: auto;   aspect-ratio: 4/3;
+  width: 100%;   height: auto;
+  aspect-ratio: 4/3;
   object-fit: contain;
   border-radius: 8px;
   cursor: pointer;
@@ -585,8 +586,8 @@ input[type="range"]::-moz-range-thumb {
   padding: 40px;
   color: var(--text-secondary);
 }
-
-.loading::after {  content: '';
+.loading::after {
+  content: '';
   width: 24px;
   height: 24px;
   border: 3px solid var(--border);
@@ -607,7 +608,11 @@ input[type="range"]::-moz-range-thumb {
   }
  
   #welcomeTitle {
-    font-size: 24px;
+    font-size: 22px;
+  }
+ 
+  .welcome-image {
+    height: 350px;
   }
  
   .listing-info h3 {
@@ -630,9 +635,9 @@ input[type="range"]::-moz-range-thumb {
 
 /* Print styles */
 @media print {
-  .modal,
-  .filters,
+  .modal,  .filters,
   .view-toggle,
   .tg-btn {
     display: none !important;
-  }}
+  }
+}
