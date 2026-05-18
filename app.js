@@ -1,59 +1,40 @@
-// 🛡 ИНИЦИАЛИЗАЦИЯ TELEGRAM WEBAPP
 let tg;
 try {
   if (window.Telegram && window.Telegram.WebApp) {
     tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
   } else {
     tg = {
-      ready: () => {},
-      expand: () => {},
-      MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {}, showProgress: () => {}, hideProgress: () => {} },
+      ready: () => {}, expand: () => {},
+      MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {} },
       showAlert: (msg) => alert(msg),
-      sendData: (data) => console.log('sendData:', data),
-      close: () => {},
       initDataUnsafe: { user: {} }
     };
   }
-} catch (e) {
-  console.error('TG Init Error:', e);
-}
+} catch (e) { console.error(e); }
 
 let config = {};
 let listings = [];
 let currentModalId = null;
+let map = null;
+let markers = [];
 
-// ✅ ГЛОБАЛЬНАЯ ФУНКЦИЯ ПЕРЕХОДА
 function startApp() {
-  const welcome = document.getElementById('welcomeScreen');
-  const main = document.getElementById('mainContent');
- 
-  if (welcome) welcome.classList.add('hidden');
-  if (main) main.classList.remove('hidden');
- 
-  if (tg && tg.MainButton) {
-    tg.MainButton.show();
-  }
- 
+  document.getElementById('welcomeScreen')?.classList.add('hidden');
+  document.getElementById('mainContent')?.classList.remove('hidden');
+  tg?.MainButton?.show();
   window.scrollTo(0, 0);
 }
 
-// 🔽 СВЕРНУТЬ/РАЗВЕРНУТЬ ФИЛЬТРЫ
 function toggleFilters() {
   const block = document.getElementById('filtersBlock');
   const btn = document.querySelector('.filters-toggle-btn');
- 
   if (block && btn) {
     block.classList.toggle('hidden');
-    if (block.classList.contains('hidden')) {
-      btn.textContent = '🔽 Фильтры';    } else {
-      btn.textContent = '🔼 Скрыть фильтры';
-    }
+    btn.textContent = block.classList.contains('hidden') ? '🔽 Фильтры' : '🔼 Скрыть фильтры';
   }
 }
 
-// 🔄 ПЕРЕКЛЮЧЕНИЕ ВИДА
 function switchView(view) {
   const listBtn = document.getElementById('listViewBtn');
   const mapBtn = document.getElementById('mapViewBtn');
@@ -61,91 +42,64 @@ function switchView(view) {
   const mapContainer = document.getElementById('mapContainer');
  
   if (view === 'list') {
-    listBtn.classList.add('active');
-    mapBtn.classList.remove('active');
-    listContainer.classList.remove('hidden');
-    mapContainer.classList.add('hidden');
+    listBtn.classList.add('active'); mapBtn.classList.remove('active');
+    listContainer.classList.remove('hidden'); mapContainer.classList.add('hidden');
   } else {
-    listBtn.classList.remove('active');
-    mapBtn.classList.add('active');
-    listContainer.classList.add('hidden');
-    mapContainer.classList.remove('hidden');
-    initMap();
-  }
+    listBtn.classList.remove('active'); mapBtn.classList.add('active');
+    listContainer.classList.add('hidden'); mapContainer.classList.remove('hidden');
+    initMap();  }
 }
 
-// 🚀 ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ
 async function init() {
   try {
     const configRes = await fetch('config.json');
-    if (!configRes.ok) throw new Error('Не удалось загрузить config.json');
     config = await configRes.json();
    
-    if (config.data?.source === 'google_sheets' && config.data?.sheetUrl) {
+    if (config.data?.sheetUrl) {
       listings = await loadFromGoogleSheets(config.data.sheetUrl);
-      console.log('✅ Загружено объектов: ' + listings.length);
     }
    
     applyTheme();
     renderWelcome();
     renderFilters();
     renderListings(listings.filter(l => l.active));
-   
-    // Инициализация маски телефона
     initPhoneMask();
    
-    if (tg && tg.MainButton) {
-      tg.MainButton.setText(config.texts?.ctaButton || 'Получить консультацию');
-      tg.MainButton.hide();      tg.MainButton.onClick(() => {
-        if (currentModalId) {
-          sendConsultRequest();
-        }
-      });
-    }
-   
+    tg?.MainButton?.setText(config.texts?.ctaButton || 'Получить консультацию');
+    tg?.MainButton?.hide();
+    tg?.MainButton?.onClick(() => { if (currentModalId) sendConsultRequest(); });
   } catch (error) {
     console.error('Init Error:', error);
   }
 }
 
-// 📥 ЗАГРУЗКА ДАННЫХ
 async function loadFromGoogleSheets(url) {
   let csvUrl = url.replace('pubhtml', 'pub');
   if (!csvUrl.includes('output=csv')) {
     csvUrl += (csvUrl.includes('?') ? '&' : '?') + 'output=csv';
   }
- 
   const response = await fetch(csvUrl);
-  const csvText = await response.text();
-  return parseCSV(csvText);
+  return parseCSV(await response.text());
 }
 
-// 🔍 ПАРСИНГ CSV
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
   if (lines.length < 2) return [];
- 
   const headers = parseCSVLine(lines[0]).map(h => h.trim());
   const result = [];
  
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
-   
     const values = parseCSVLine(lines[i]);
     const obj = {};
-   
     headers.forEach((header, index) => {
       let value = values[index] !== undefined ? values[index].trim() : '';
-     
       if (value === 'TRUE') value = true;
       else if (value === 'FALSE') value = false;
-      else if (!isNaN(value) && value !== '') value = Number(value);
-     
-      obj[header] = value;
+      else if (!isNaN(value) && value !== '') value = Number(value);      obj[header] = value;
     });
-   
     result.push(obj);
-  } 
+  }
   return result;
 }
 
@@ -153,35 +107,22 @@ function parseCSVLine(line) {
   const result = [];
   let current = '';
   let inQuotes = false;
- 
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-   
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
+    if (char === '"') inQuotes = !inQuotes;
+    else if (char === ',' && !inQuotes) { result.push(current); current = ''; }
+    else current += char;
   }
   result.push(current);
- 
   return result;
 }
 
-// 🎨 ТЕМЫ И WELCOME
 function applyTheme() {
   if (!config.brand) return;
- 
   document.documentElement.style.setProperty('--primary', config.brand.primaryColor || '#1a365d');
   document.documentElement.style.setProperty('--accent', config.brand.accentColor || '#d4af37');
- 
   const img = document.getElementById('welcomeImage');
-  if (img && config.brand.welcomeImage) {
-    img.src = config.brand.welcomeImage;
-  }
+  if (img && config.brand.welcomeImage) img.src = config.brand.welcomeImage;
 }
 
 function renderWelcome() {
@@ -190,221 +131,232 @@ function renderWelcome() {
     document.getElementById('mainContent')?.classList.remove('hidden');
     return;
   }
- 
-  const titleEl = document.getElementById('welcomeTitle');
-  const subEl = document.getElementById('welcomeSubtitle');
- 
-  if (titleEl) titleEl.textContent = config.brand.welcomeTitle || '';  if (subEl) subEl.textContent = config.brand.welcomeSubtitle || '';
+  document.getElementById('welcomeTitle').textContent = config.brand.welcomeTitle || '';
+  document.getElementById('welcomeSubtitle').textContent = config.brand.welcomeSubtitle || '';
 }
 
-// ✅ ФИЛЬТРЫ
 function renderFilters() {
+  // Районы
   const districts = [...new Set(listings.map(l => l.district).filter(Boolean))].sort();
   const districtContainer = document.getElementById('districtCheckboxes');
- 
   if (districtContainer) {
     districtContainer.innerHTML = '';
     districts.forEach(d => {
       const label = document.createElement('label');
       label.className = 'checkbox-label';
-      label.innerHTML = '<input type="checkbox" value="' + escapeHtml(d) + '" class="filter-checkbox" data-filter="district"><span>' + escapeHtml(d) + '</span>';
-      districtContainer.appendChild(label);
-    });
+      label.innerHTML = `<input type="checkbox" value="${escapeHtml(d)}" class="filter-checkbox" data-filter="district"><span>${escapeHtml(d)}</span>`;
+      districtContainer.appendChild(label);    });
   }
  
+  // Метро
   const metros = [...new Set(listings.map(l => l.metro).filter(Boolean))].sort();
   const metroContainer = document.getElementById('metroCheckboxes');
- 
   if (metroContainer) {
     metroContainer.innerHTML = '';
     metros.forEach(m => {
       const label = document.createElement('label');
       label.className = 'checkbox-label';
-      label.innerHTML = '<input type="checkbox" value="' + escapeHtml(m) + '" class="filter-checkbox" data-filter="metro"><span>' + escapeHtml(m) + '</span>';
+      label.innerHTML = `<input type="checkbox" value="${escapeHtml(m)}" class="filter-checkbox" data-filter="metro"><span>${escapeHtml(m)}</span>`;
       metroContainer.appendChild(label);
     });
   }
  
+  // Комнаты
+  const roomsContainer = document.getElementById('roomsCheckboxes');
+  if (roomsContainer) {
+    const allRooms = [];
+    listings.forEach(l => {
+      if (l.rooms) {
+        const roomList = String(l.rooms).split(',').map(r => r.trim());
+        roomList.forEach(r => { if (r && !allRooms.includes(r)) allRooms.push(r); });
+      }
+    });
+    allRooms.sort();
+    roomsContainer.innerHTML = '';
+    allRooms.forEach(r => {
+      const label = document.createElement('label');
+      label.className = 'checkbox-label';
+      label.innerHTML = `<input type="checkbox" value="${escapeHtml(r)}" class="filter-checkbox" data-filter="rooms"><span>${escapeHtml(r)}</span>`;
+      roomsContainer.appendChild(label);
+    });
+  }
+ 
+  // Цена до
   const priceFilter = document.getElementById('priceFilter');
   const priceValue = document.getElementById('priceValue');
- 
   if (priceFilter && priceValue) {
-    const maxP = config.filters?.defaults?.maxPrice || 500;
+    const maxP = config.filters?.defaults?.maxPrice || 50;
     priceFilter.max = maxP;
     priceFilter.value = maxP;
     priceValue.textContent = maxP;
-   
-    priceFilter.addEventListener('input', function(e) {
+    priceFilter.addEventListener('input', e => {
       priceValue.textContent = e.target.value;
       filterListings();
     });
   }
- 
-  document.querySelectorAll('.filter-checkbox').forEach(cb => {
-    cb.addEventListener('change', filterListings);
-  });
+    document.querySelectorAll('.filter-checkbox').forEach(cb => cb.addEventListener('change', filterListings));
 }
-// 🔍 ФИЛЬТРАЦИЯ
+
 function filterListings() {
-  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 500);
- 
-  const selectedDistricts = Array.from(
-    document.querySelectorAll('input[data-filter="district"]:checked')
-  ).map(cb => cb.value);
- 
-  const selectedMetros = Array.from(
-    document.querySelectorAll('input[data-filter="metro"]:checked')
-  ).map(cb => cb.value);
+  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 50);
+  const selectedDistricts = Array.from(document.querySelectorAll('input[data-filter="district"]:checked')).map(cb => cb.value);
+  const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);
+  const selectedRooms = Array.from(document.querySelectorAll('input[data-filter="rooms"]:checked')).map(cb => cb.value);
  
   const filtered = listings.filter(item => {
     if (!item.active) return false;
-    if (typeof item.price_from !== 'number') return false;
-    if (item.price_from > maxPrice) return false;
+    if (typeof item.price_from !== 'number' || item.price_from > maxPrice) return false;
     if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
     if (selectedMetros.length > 0 && !selectedMetros.includes(item.metro)) return false;
+   
+    // Фильтр по комнатам
+    if (selectedRooms.length > 0 && item.rooms) {
+      const itemRooms = String(item.rooms).split(',').map(r => r.trim());
+      const hasMatch = selectedRooms.some(r => itemRooms.includes(r));
+      if (!hasMatch) return false;
+    }
     return true;
   });
  
   renderListings(filtered);
 }
 
-// 🏠 РЕНДЕР СПИСКА
 function renderListings(data) {
   const container = document.getElementById('listingsContainer');
   if (!container) return;
- 
   container.innerHTML = '';
  
   if (!data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state">' + (config.texts?.emptyState || 'Нет объектов по заданным фильтрам') + '</div>';
+    container.innerHTML = `<div class="empty-state">${config.texts?.emptyState || 'Нет объектов'}</div>`;
     return;
   }
  
   data.forEach(item => {
     const price = typeof item.price_from === 'number' ? item.price_from.toFixed(1) : '?';
-    const ppsqm = typeof item.price_per_sqm === 'number'
-      ? Math.round(item.price_per_sqm).toLocaleString('ru-RU')
+    const priceTo = typeof item.price_to === 'number' ? item.price_to.toFixed(1) : '';
+    const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString('ru-RU') : '';
+    const area = (typeof item.area_min === 'number' && typeof item.area_max === 'number')
+      ? `${item.area_min}–${item.area_max} м²`
       : '';
-   
+    const rooms = item.rooms || '';
     const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');
-    let statusText = item.status || '';
+    const statusText = item.status === 'Сдан' ? '✅ Сдан' : item.status === 'Строится' ? '🏗 Строится' : '🟡 Частично сдан';
    
-    if (item.status === 'Сдан') statusText = '✅ Сдан';
-    else if (item.status === 'Строится') statusText = '🏗 Строится';
-    else if (item.status === 'Частично сдан') statusText = '🟡 Частично сдан';
-        const card = document.createElement('div');
-    card.className = 'listing-card';
-    // Клик по карточке открывает детали, если клик не по кнопке
-    card.onclick = function(e) {
-      if (!e.target.closest('.consult-btn-inline')) {
-        openDetails(item.id);
-      }
+    const card = document.createElement('div');
+    card.className = 'listing-card';    card.onclick = function(e) {
+      if (!e.target.closest('.consult-btn-inline')) openDetails(item.id);
     };
    
-    // Добавляем кнопку ВНУТРЬ карточки
     card.innerHTML = `
-      <img src="${escapeHtml(item.image_main) || ''}"
-           alt="${escapeHtml(item.name) || ''}"
-           class="listing-image"
-           onerror="this.style.display='none'">
+      <img src="${escapeHtml(item.image_main) || ''}" alt="${escapeHtml(item.name) || ''}" class="listing-image" onerror="this.style.display='none'">
       <div class="listing-info">
         <h3>${escapeHtml(item.name) || 'Без названия'}</h3>
         <div class="listing-meta">
           <span>${escapeHtml(item.district) || ''}</span>
           <span>🚇 ${escapeHtml(item.metro) || ''}</span>
+          ${rooms ? `<span>🚪 ${escapeHtml(rooms)}</span>` : ''}
+          ${area ? `<span>📐 ${escapeHtml(area)}</span>` : ''}
         </div>
         <div class="listing-price">
-          от ${price} млн ₽
+          от ${price} млн ₽${priceTo ? ` до ${priceTo} млн ₽` : ''}
           ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}
         </div>
         <div class="listing-status status-${statusKey}">${statusText}</div>
         <button class="tg-btn consult-btn-inline" onclick="openConsultForm('${item.id}', event)">📞 Получить консультацию</button>
       </div>
     `;
-   
     container.appendChild(card);
   });
 }
 
-// 🔍 ДЕТАЛИ ОБЪЕКТА
+function initMap() {
+  if (typeof L === 'undefined') return;
+  const mapContainer = document.getElementById('mapContainer');
+  if (!mapContainer) return;
+ 
+  if (!map) {
+    map = L.map('mapContainer').setView([59.9343, 30.3351], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+  }
+ 
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+ 
+  const activeListings = listings.filter(l => l.active && l.lat && l.lng);
+  activeListings.forEach(item => {
+    const marker = L.marker([item.lat, item.lng])
+      .addTo(map)
+      .bindPopup(`<b>${item.name}</b><br>от ${item.price_from || '?'} млн ₽`);
+    markers.push(marker);
+  });
+ 
+  if (markers.length > 0) {
+    map.fitBounds(new L.featureGroup(markers).getBounds().pad(0.1));
+  }  setTimeout(() => map.invalidateSize(), 150);
+}
+
 function openDetails(id) {
   const item = listings.find(l => l.id === id);
   if (!item) return;
- 
   currentModalId = id;
  
   document.getElementById('modalTitle').textContent = item.name || '';
- 
   const price = typeof item.price_from === 'number' ? item.price_from.toFixed(1) : '?';
-  const ppsqm = typeof item.price_per_sqm === 'number'
-    ? Math.round(item.price_per_sqm).toLocaleString('ru-RU')
-    : '';
+  const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString('ru-RU') : '';
+  document.getElementById('modalPrice').innerHTML = `от <b>${price}</b> млн ₽${ppsqm ? ` <span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}`;
  
-  document.getElementById('modalPrice').innerHTML = 'от <b>' + price + '</b> млн ₽' + (ppsqm ? ' <span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>' : '');
-    document.getElementById('modalMeta').innerHTML = '<div class="meta-row"><span>📍 ' + (escapeHtml(item.address) || '') + '</span></div><div class="meta-row"><span>🚇 ' + (escapeHtml(item.metro) || '') + '</span></div><div class="meta-row"><span>🏗 ' + (escapeHtml(item.class) || '') + ' • ' + (escapeHtml(item.finishing) || '') + '</span></div><div class="meta-row"><span>📅 ' + (escapeHtml(item.completion_all || item.completion_soonest) || '') + '</span></div>';
+  document.getElementById('modalMeta').innerHTML = `
+    <div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div>
+    <div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div>
+    <div class="meta-row"><span>🏗 ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div>
+    <div class="meta-row"><span>📅 ${escapeHtml(item.completion_soonest || item.completion_all) || ''}</span></div>
+  `;
  
   document.getElementById('modalDescription').textContent = item.description || 'Описание отсутствует';
  
   const featuresDiv = document.getElementById('modalFeatures');
-  if (item.features) {
-    const featuresList = item.features.split(',').map(f => f.trim()).filter(Boolean);
-    featuresDiv.innerHTML = '<ul>' + featuresList.map(f => '<li>' + escapeHtml(f) + '</li>').join('') + '</ul>';
-  } else {
-    featuresDiv.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
-  }
+  featuresDiv.innerHTML = item.features
+    ? `<ul>${item.features.split(',').map(f => `<li>${escapeHtml(f.trim())}</li>`).join('')}</ul>`
+    : '<p style="color: var(--text-secondary)">Информация уточняется</p>';
  
   const plansContainer = document.getElementById('modalFloorPlans');
   plansContainer.innerHTML = '';
- 
   if (item.floor_plans_text) {
     const textDiv = document.createElement('div');
     textDiv.className = 'floor-plans-text';
     textDiv.textContent = item.floor_plans_text;
     plansContainer.appendChild(textDiv);
   }
- 
   if (item.floor_plans_images) {
     const galleryDiv = document.createElement('div');
     galleryDiv.className = 'floor-plans-gallery';
-    const urls = item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean);
-   
-    urls.forEach(url => {
+    item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url;
-      img.className = 'floor-plan-image';
-      img.alt = 'Планировка';
+      img.src = url; img.className = 'floor-plan-image';
       img.onclick = () => window.open(url, '_blank');
       galleryDiv.appendChild(img);
     });
-   
     plansContainer.appendChild(galleryDiv);
   }
- 
   if (!item.floor_plans_text && !item.floor_plans_images) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
- 
-  const gallery = document.getElementById('modalGallery');
+    const gallery = document.getElementById('modalGallery');
   gallery.innerHTML = '';
- 
   if (item.image_main) {
     const mainImg = document.createElement('img');
-    mainImg.src = item.image_main;
-    mainImg.className = 'modal-main-image';    gallery.appendChild(mainImg);
+    mainImg.src = item.image_main; mainImg.className = 'modal-main-image';
+    gallery.appendChild(mainImg);
   }
- 
   if (item.images_gallery) {
-    const urls = item.images_gallery.split(',').map(u => u.trim()).filter(Boolean);
-    urls.forEach(url => {
+    item.images_gallery.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url;
-      img.className = 'modal-thumb';
+      img.src = url; img.className = 'modal-thumb';
       img.onclick = () => window.open(url, '_blank');
       gallery.appendChild(img);
     });
   }
  
-  // ✅ ДОБАВЛЯЕМ КНОПКУ ВНУТРЬ КАРТОЧКИ (ДЛЯ ПК)
   const modalContent = document.querySelector('#detailsModal .modal-content');
   let btn = document.getElementById('modalConsultBtn');
   if (!btn) {
@@ -416,48 +368,31 @@ function openDetails(id) {
     modalContent.appendChild(btn);
   }
   btn.textContent = '📞 Получить консультацию';
-  btn.onclick = function() { openConsultForm(id); };
+  btn.onclick = () => openConsultForm(id);
  
   document.getElementById('detailsModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
- 
-  if (tg && tg.MainButton) {
-    tg.MainButton.show();
-  }
+  tg?.MainButton?.show();
 }
 
 function closeModal() {
   document.getElementById('detailsModal').classList.add('hidden');
   document.body.style.overflow = '';
   currentModalId = null;
- 
-  if (tg && tg.MainButton) {
-    tg.MainButton.hide();
-  }
+  tg?.MainButton?.hide();
 }
 
-// 📞 ОТКРЫТИЕ ФОРМЫ КОНСУЛЬТАЦИИ
 function openConsultForm(id, event) {
   if (event) event.stopPropagation();
-  currentModalId = id;  sendConsultRequest();
+  currentModalId = id;
+  sendConsultRequest();
 }
 
-// 📞 ФОРМА КОНСУЛЬТАЦИИ
 function sendConsultRequest() {
   const item = listings.find(l => l.id === currentModalId);
-  if (!item) return;
- 
-  // Показываем название объекта в форме
-  const objNameEl = document.getElementById('consultObjectName');
-  if (objNameEl) objNameEl.textContent = '🏢 ' + item.name;
- 
-  // Очищаем поля формы
-  const nameInput = document.getElementById('consultName');
-  const phoneInput = document.getElementById('consultPhone');
-  if (nameInput) nameInput.value = '';
-  if (phoneInput) phoneInput.value = '+7 (';
- 
-  // Открываем модалку с формой
+  if (!item) return;  document.getElementById('consultObjectName').textContent = '🏢 ' + item.name;
+  document.getElementById('consultName').value = '';
+  document.getElementById('consultPhone').value = '+7 (';
   document.getElementById('consultModal').classList.remove('hidden');
 }
 
@@ -466,83 +401,59 @@ function closeConsultModal() {
   document.getElementById('consultForm').reset();
 }
 
-// 📱 МАСКА ТЕЛЕФОНА
 function initPhoneMask() {
   const phoneInput = document.getElementById('consultPhone');
   if (!phoneInput) return;
- 
   phoneInput.addEventListener('input', function(e) {
     let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-    if (!x[2]) {
-      e.target.value = '+7 (';
-    } else {
-      e.target.value = !x[3] ? '+7 (' + x[2] : '+7 (' + x[2] + ') ' + x[3] + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
-    }
+    e.target.value = !x[2] ? '+7 (' : '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
   });
- 
-  phoneInput.addEventListener('focus', function(e) {
-    if (e.target.value === '') e.target.value = '+7 (';
-  });
+  phoneInput.addEventListener('focus', function(e) { if (e.target.value === '') e.target.value = '+7 ('; });
 }
 
 function submitConsultForm(event) {
   event.preventDefault();
- 
-  const item = listings.find(l => l.id === currentModalId);  if (!item) return;
+  const item = listings.find(l => l.id === currentModalId);
+  if (!item) return;
  
   const name = document.getElementById('consultName').value;
-  let phone = document.getElementById('consultPhone').value;
+  const phone = document.getElementById('consultPhone').value;
  
-  // Проверка на валидность номера
   if (phone.length < 18) {
-    if (tg?.showAlert) tg.showAlert('❌ Введите корректный номер телефона');
+    tg?.showAlert('❌ Введите корректный номер телефона');
     return;
   }
  
-  // ⚠️ ВАЖНО: Вставь сюда свои данные!
   const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
   const CHAT_ID = '2038206387';
- 
-  // ✅ ИСПРАВЛЕННЫЙ ТЕКСТ (УБРАНО ДВОЙНОЕ "ЖК")
   const text = '🔔 Новая заявка!\n\n🏢 ' + item.name + '\n👤 ' + name + '\n📱 ' + phone;
  
-  // Блокируем кнопку
   const submitBtn = event.target.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
   submitBtn.textContent = 'Отправка...';
   submitBtn.disabled = true;
  
-  // Отправляем в Telegram
-  fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: CHAT_ID, text: text })
   })
   .then(res => res.json())
-  .then(data => {
-    if (data.ok) {
+  .then(data => {    if (data.ok) {
       closeConsultModal();
-      if (tg?.showAlert) tg.showAlert('✅ Заявка отправлена!');
+      tg?.showAlert('✅ Заявка отправлена!');
       event.target.reset();
     } else {
-      console.error('Telegram Error:', data);
-      if (tg?.showAlert) tg.showAlert('❌ Ошибка: ' + (data.description || 'Неизвестная ошибка'));
+      tg?.showAlert('❌ Ошибка: ' + (data.description || 'Неизвестная'));
     }
   })
-  .catch(err => {
-    console.error('Network Error:', err);
-    if (tg?.showAlert) tg.showAlert('❌ Ошибка сети');
+  .catch(() => {
+    tg?.showAlert('❌ Ошибка сети');
   })
   .finally(() => {
     submitBtn.textContent = originalText;
     submitBtn.disabled = false;
   });
-}
-function initMap() {
-  const mapContainer = document.getElementById('mapContainer');
-  if (mapContainer) {
-    mapContainer.innerHTML = '<div style="text-align: center; color: var(--text-secondary)">🗺 Карта будет добавлена</div>';
-  }
 }
 
 function escapeHtml(text) {
@@ -552,7 +463,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// 🚀 ЗАПУСК
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
