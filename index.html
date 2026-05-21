@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Welcome Screen -->
   <div id="welcomeScreen" class="screen welcome">
     <img id="welcomeImage" class="welcome-img" src="" alt="Welcome">
     <h1 id="welcomeTitle" class="welcome-title">Каталог новостроек</h1>
@@ -17,48 +16,40 @@
     <button class="btn-primary" onclick="startApp()">Начать подбор</button>
   </div>
 
-  <!-- Main Content -->
   <div id="mainContent" class="screen main hidden">
     <header class="header">
       <h1 id="headerTitle">Новостройки СПб</h1>
     </header>
-   
     <div class="filters-toggle">
       <button class="filters-toggle-btn" onclick="toggleFilters()">🔽 Фильтры</button>
     </div>
-   
     <div id="filtersBlock" class="filters-block hidden">
       <div class="filter-group">
         <label>💰 Цена до (млн ₽)</label>
         <input type="range" id="priceFilter" min="1" max="50" value="50">
         <span id="priceValue">50</span> млн
       </div>
-     
       <div class="filter-group">
         <label>📍 Районы</label>
         <div id="districtCheckboxes" class="checkbox-group"></div>
       </div>
-     
       <div class="filter-group">
         <label>🚇 Метро</label>
         <div id="metroCheckboxes" class="checkbox-group"></div>
       </div>
-     
       <div class="filter-group">
         <label>🚪 Комнаты</label>
         <div id="roomsCheckboxes" class="checkbox-group"></div>
-      </div>    </div>
-   
+      </div>
+    </div>
     <div class="view-toggle">
       <button id="listViewBtn" class="view-btn active" onclick="switchView('list')">📋 Список</button>
       <button id="mapViewBtn" class="view-btn" onclick="switchView('map')">🗺 Карта</button>
     </div>
-   
     <div id="listingsContainer" class="listings"></div>
     <div id="mapContainer" class="map-container hidden"></div>
   </div>
 
-  <!-- Details Modal -->
   <div id="detailsModal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" onclick="closeModal()">✕</button>
@@ -67,27 +58,22 @@
         <h2 id="modalTitle"></h2>
         <div id="modalPrice" class="modal-price"></div>
         <div id="modalMeta" class="modal-meta"></div>
-       
         <h3>📖 Описание</h3>
         <div id="modalDescription" class="modal-desc"></div>
-       
         <h3>✨ Преимущества</h3>
         <div id="modalFeatures" class="modal-features"></div>
-       
         <h3>📐 Планировки</h3>
         <div id="modalFloorPlans" class="modal-floor-plans"></div>
       </div>
     </div>
   </div>
 
-  <!-- Consult Form Modal -->
   <div id="consultModal" class="modal hidden">
     <div class="modal-content form-modal">
       <button class="close-btn" onclick="closeConsultModal()">✕</button>
       <h3>Заказать консультацию</h3>
       <p id="consultObjectName" class="form-object"></p>
       <p class="form-hint">Оставьте контакты — мы перезвоним и ответим на все вопросы по объекту</p>
-     
       <form id="consultForm" onsubmit="submitConsultForm(event)">
         <input type="text" id="consultName" placeholder="Ваше имя *" required>
         <input type="tel" id="consultPhone" placeholder="Телефон *" required>
@@ -96,7 +82,8 @@
     </div>
   </div>
 
-  <script src="config.js"></script>  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="config.json"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
