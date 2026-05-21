@@ -2,10 +2,12 @@ let tg;
 try {
   if (window.Telegram && window.Telegram.WebApp) {
     tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
+    tg.ready();
+    tg.expand();
   } else {
     tg = {
-      ready: () => {}, expand: () => {},
+      ready: () => {},
+      expand: () => {},
       MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {} },
       showAlert: (msg) => alert(msg),
       initDataUnsafe: { user: {} }
@@ -41,13 +43,17 @@ function switchView(view) {
   const listContainer = document.getElementById('listingsContainer');
   const mapContainer = document.getElementById('mapContainer');
   if (view === 'list') {
-    listBtn.classList.add('active'); mapBtn.classList.remove('active');
-    listContainer.classList.remove('hidden'); mapContainer.classList.add('hidden');
-  } else {
-    listBtn.classList.remove('active'); mapBtn.classList.add('active');
-    listContainer.classList.add('hidden'); mapContainer.classList.remove('hidden');
+    listBtn.classList.add('active');
+    mapBtn.classList.remove('active');
+    listContainer.classList.remove('hidden');
+    mapContainer.classList.add('hidden');
+  } else {    listBtn.classList.remove('active');
+    mapBtn.classList.add('active');
+    listContainer.classList.add('hidden');
+    mapContainer.classList.remove('hidden');
     setTimeout(() => initMap(), 100);
-  }}
+  }
+}
 
 async function init() {
   try {
@@ -90,13 +96,13 @@ function parseCSV(csv) {
     headers.forEach((header, index) => {
       let value = values[index] !== undefined ? values[index].trim() : '';
       if (value === 'TRUE') value = true;
-      else if (value === 'FALSE') value = false;
-      else if (!isNaN(value) && value !== '') value = Number(value);
+      else if (value === 'FALSE') value = false;      else if (!isNaN(value) && value !== '') value = Number(value);
       obj[header] = value;
     });
     result.push(obj);
   }
-  return result;}
+  return result;
+}
 
 function parseCSVLine(line) {
   const result = [];
@@ -139,13 +145,12 @@ function renderFilters() {
       const label = document.createElement('label');
       label.className = 'checkbox-label';
       label.innerHTML = `<input type="checkbox" value="${escapeHtml(d)}" class="filter-checkbox" data-filter="district"><span>${escapeHtml(d)}</span>`;
-      districtContainer.appendChild(label);
-    });
+      districtContainer.appendChild(label);    });
   }
- 
   const metros = [...new Set(listings.map(l => l.metro).filter(Boolean))].sort();
   const metroContainer = document.getElementById('metroCheckboxes');
-  if (metroContainer) {    metroContainer.innerHTML = '';
+  if (metroContainer) {
+    metroContainer.innerHTML = '';
     metros.forEach(m => {
       const label = document.createElement('label');
       label.className = 'checkbox-label';
@@ -153,7 +158,6 @@ function renderFilters() {
       metroContainer.appendChild(label);
     });
   }
- 
   const roomsContainer = document.getElementById('roomsCheckboxes');
   if (roomsContainer) {
     const allRooms = [];
@@ -172,7 +176,6 @@ function renderFilters() {
       roomsContainer.appendChild(label);
     });
   }
- 
   const priceFilter = document.getElementById('priceFilter');
   const priceValue = document.getElementById('priceValue');
   if (priceFilter && priceValue) {
@@ -191,10 +194,9 @@ function renderFilters() {
 function filterListings() {
   const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 50);
   const selectedDistricts = Array.from(document.querySelectorAll('input[data-filter="district"]:checked')).map(cb => cb.value);
-  const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);
-  const selectedRooms = Array.from(document.querySelectorAll('input[data-filter="rooms"]:checked')).map(cb => cb.value);
- 
-  const filtered = listings.filter(item => {    if (!item.active) return false;
+  const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);  const selectedRooms = Array.from(document.querySelectorAll('input[data-filter="rooms"]:checked')).map(cb => cb.value);
+  const filtered = listings.filter(item => {
+    if (!item.active) return false;
     if (typeof item.price_from !== 'number' || item.price_from > maxPrice) return false;
     if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
     if (selectedMetros.length > 0 && !selectedMetros.includes(item.metro)) return false;
@@ -216,7 +218,6 @@ function renderListings(data) {
     container.innerHTML = `<div class="empty-state">${config.texts?.emptyState || 'Нет объектов'}</div>`;
     return;
   }
- 
   data.forEach(item => {
     // ИСПРАВЛЕНИЕ ЦЕНЫ
     let priceDisplay = '?';
@@ -227,38 +228,21 @@ function renderListings(data) {
         priceDisplay = `${(item.price_from / 1000000).toFixed(1)} млн ₽`;
       }
     }
-   
     const priceTo = typeof item.price_to === 'number' ? item.price_to.toFixed(1) : '';
     const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString('ru-RU') : '';
     const area = (typeof item.area_min === 'number' && typeof item.area_max === 'number') ? `${item.area_min}–${item.area_max} м²` : '';
     const rooms = item.rooms || '';
     const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');
     const statusText = item.status === 'Сдан' ? '✅ Сдан' : item.status === 'Строится' ? '🏗 Строится' : '🟡 Частично сдан';
-   
     const card = document.createElement('div');
     card.className = 'listing-card';
     card.onclick = function(e) {
       if (!e.target.closest('.consult-btn-inline')) openDetails(item.id);
     };
-   
-    card.innerHTML = `
-      <img src="${escapeHtml(item.image_main) || ''}" alt="${escapeHtml(item.name) || ''}" class="listing-image" onerror="this.style.display='none'">
-      <div class="listing-info">        <h3>${escapeHtml(item.name) || 'Без названия'}</h3>
-        <div class="listing-meta">
-          <span>${escapeHtml(item.district) || ''}</span>
-          <span>🚇 ${escapeHtml(item.metro) || ''}</span>
-          ${rooms ? `<span>🚪 ${escapeHtml(rooms)}</span>` : ''}
-          ${area ? `<span>📐 ${escapeHtml(area)}</span>` : ''}
-        </div>
-        <div class="listing-price">от ${priceDisplay}${priceTo ? ` до ${priceTo} млн ₽` : ''} ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}</div>
-        <div class="listing-status status-${statusKey}">${statusText}</div>
-        <button class="tg-btn consult-btn-inline" onclick="openConsultForm('${item.id}', event)">📞 Получить консультацию</button>
-      </div>
-    `;
+    card.innerHTML = `<img src="${escapeHtml(item.image_main) || ''}" alt="${escapeHtml(item.name) || ''}" class="listing-image" onerror="this.style.display='none'"><div class="listing-info"><h3>${escapeHtml(item.name) || 'Без названия'}</h3><div class="listing-meta"><span>${escapeHtml(item.district) || ''}</span><span>🚇 ${escapeHtml(item.metro) || ''}</span>${rooms ? `<span>🚪 ${escapeHtml(rooms)}</span>` : ''}${area ? `<span>📐 ${escapeHtml(area)}</span>` : ''}</div><div class="listing-price">от ${priceDisplay}${priceTo ? ` до ${priceTo} млн ₽` : ''} ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}</div><div class="listing-status status-${statusKey}">${statusText}</div><button class="tg-btn consult-btn-inline" onclick="openConsultForm('${item.id}', event)">📞 Получить консультацию</button></div>`;
     container.appendChild(card);
   });
 }
-
 function initMap() {
   if (typeof L === 'undefined') return;
   const mapContainer = document.getElementById('mapContainer');
@@ -271,7 +255,11 @@ function initMap() {
   markers = [];
   const activeListings = listings.filter(l => l.active && l.lat && l.lng);
   activeListings.forEach(item => {
-    const marker = L.marker([item.lat, item.lng]).addTo(map).bindPopup(`<b>${item.name}</b><br>от ${typeof item.price_from === 'number' ? (item.price_from < 1000 ? item.price_from.toFixed(1) : (item.price_from / 1000000).toFixed(1)) : '?'} млн ₽`);
+    let priceDisplay = '?';
+    if (typeof item.price_from === 'number') {
+      priceDisplay = item.price_from < 1000 ? item.price_from.toFixed(1) : (item.price_from / 1000000).toFixed(1);
+    }
+    const marker = L.marker([item.lat, item.lng]).addTo(map).bindPopup(`<b>${item.name}</b><br>от ${priceDisplay} млн ₽`);
     markers.push(marker);
   });
   if (markers.length > 0) {
@@ -285,19 +273,16 @@ function openDetails(id) {
   if (!item) return;
   currentModalId = id;
   document.getElementById('modalTitle').textContent = item.name || '';
- 
   let priceDisplay = '?';
   if (typeof item.price_from === 'number') {
     priceDisplay = item.price_from < 1000 ? item.price_from.toFixed(1) : (item.price_from / 1000000).toFixed(1);
   }
   const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString('ru-RU') : '';
   document.getElementById('modalPrice').innerHTML = `от <b>${priceDisplay}</b> млн ₽ ${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}`;
-    document.getElementById('modalMeta').innerHTML = `<div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div><div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div><div class="meta-row"><span>🏗 ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div><div class="meta-row"><span>📅 ${escapeHtml(item.completion_soonest || item.completion_all) || ''}</span></div>`;
- 
+  document.getElementById('modalMeta').innerHTML = `<div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div><div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div><div class="meta-row"><span>🏗 ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div><div class="meta-row"><span>📅 ${escapeHtml(item.completion_soonest || item.completion_all) || ''}</span></div>`;
   document.getElementById('modalDescription').textContent = item.description || 'Описание отсутствует';
   const featuresDiv = document.getElementById('modalFeatures');
   featuresDiv.innerHTML = item.features ? `<ul>${item.features.split(',').map(f => `<li>${escapeHtml(f.trim())}</li>`).join('')}</ul>` : '<p style="color: var(--text-secondary)">Информация уточняется</p>';
- 
   const plansContainer = document.getElementById('modalFloorPlans');
   plansContainer.innerHTML = '';
   if (item.floor_plans_text) {
@@ -307,11 +292,11 @@ function openDetails(id) {
     plansContainer.appendChild(textDiv);
   }
   if (item.floor_plans_images) {
-    const galleryDiv = document.createElement('div');
-    galleryDiv.className = 'floor-plans-gallery';
+    const galleryDiv = document.createElement('div');    galleryDiv.className = 'floor-plans-gallery';
     item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url; img.className = 'floor-plan-image';
+      img.src = url;
+      img.className = 'floor-plan-image';
       img.onclick = () => window.open(url, '_blank');
       galleryDiv.appendChild(img);
     });
@@ -320,28 +305,29 @@ function openDetails(id) {
   if (!item.floor_plans_text && !item.floor_plans_images) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
- 
   const gallery = document.getElementById('modalGallery');
   gallery.innerHTML = '';
   if (item.image_main) {
     const mainImg = document.createElement('img');
-    mainImg.src = item.image_main; mainImg.className = 'modal-main-image';
+    mainImg.src = item.image_main;
+    mainImg.className = 'modal-main-image';
     gallery.appendChild(mainImg);
   }
   if (item.images_gallery) {
     item.images_gallery.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url; img.className = 'modal-thumb';
+      img.src = url;
+      img.className = 'modal-thumb';
       img.onclick = () => window.open(url, '_blank');
       gallery.appendChild(img);
     });
   }
- 
   const modalContent = document.querySelector('#detailsModal .modal-content');
   let btn = document.getElementById('modalConsultBtn');
   if (!btn) {
     btn = document.createElement('button');
-    btn.id = 'modalConsultBtn';    btn.className = 'tg-btn';
+    btn.id = 'modalConsultBtn';
+    btn.className = 'tg-btn';
     btn.style.marginTop = '20px';
     btn.style.marginBottom = '40px';
     modalContent.appendChild(btn);
@@ -355,8 +341,7 @@ function openDetails(id) {
 
 function closeModal() {
   document.getElementById('detailsModal').classList.add('hidden');
-  document.body.style.overflow = '';
-  currentModalId = null;
+  document.body.style.overflow = '';  currentModalId = null;
   tg?.MainButton?.hide();
 }
 
@@ -390,7 +375,8 @@ function initPhoneMask() {
   phoneInput.addEventListener('focus', function(e) { if (e.target.value === '') e.target.value = '+7 ('; });
 }
 
-function submitConsultForm(event) {  event.preventDefault();
+function submitConsultForm(event) {
+  event.preventDefault();
   const item = listings.find(l => l.id === currentModalId);
   if (!item) return;
   const name = document.getElementById('consultName').value;
@@ -399,16 +385,12 @@ function submitConsultForm(event) {  event.preventDefault();
     tg?.showAlert('❌ Введите корректный номер телефона');
     return;
   }
- 
-  // БЕЗОПАСНО: открываем чат с ботом вместо отправки через API
   const botLink = config.contact?.botLink || 'https://t.me/demo_newbuilds_bot';
   if (tg?.openLink) {
     tg.openLink(botLink);
   } else {
     window.open(botLink, '_blank');
-  }
- 
-  closeConsultModal();
+  }  closeConsultModal();
   tg?.showAlert('✅ Вы будете перенаправлены в чат с менеджером');
 }
 
