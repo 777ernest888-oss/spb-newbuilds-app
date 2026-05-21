@@ -2,16 +2,30 @@ let tg;
 try {
   if (window.Telegram && window.Telegram.WebApp) {
     tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor(APP_CONFIG.brand.primaryColor);
+    tg.setBackgroundColor('#f5f7fa');
   } else {
     tg = {
-      ready: () => {}, expand: () => {},
-      MainButton: { setText: () => {}, show: () => {}, onClick: () => {}, hide: () => {} },
+      ready: () => {},
+      expand: () => {},
+      setHeaderColor: () => {},
+      setBackgroundColor: () => {},
+      MainButton: {
+        setText: () => {},
+        show: () => {},
+        onClick: () => {},
+        hide: () => {}
+      },
       showAlert: (msg) => alert(msg),
-      initDataUnsafe: { user: {} }
+      initDataUnsafe: { user: {} },
+      openTelegramLink: (url) => window.open(url, '_blank')
     };
   }
-} catch (e) { console.error(e); }
+} catch (e) {
+  console.error('Telegram SDK Error:', e);
+}
 
 let config = {};
 let listings = [];
@@ -34,7 +48,6 @@ function toggleFilters() {
     btn.textContent = block.classList.contains('hidden') ? '🔽 Фильтры' : '🔼 Скрыть фильтры';
   }
 }
-
 function switchView(view) {
   const listBtn = document.getElementById('listViewBtn');
   const mapBtn = document.getElementById('mapViewBtn');
@@ -42,18 +55,22 @@ function switchView(view) {
   const mapContainer = document.getElementById('mapContainer');
  
   if (view === 'list') {
-    listBtn.classList.add('active'); mapBtn.classList.remove('active');
-    listContainer.classList.remove('hidden'); mapContainer.classList.add('hidden');
+    listBtn.classList.add('active');
+    mapBtn.classList.remove('active');
+    listContainer.classList.remove('hidden');
+    mapContainer.classList.add('hidden');
   } else {
-    listBtn.classList.remove('active'); mapBtn.classList.add('active');
-    listContainer.classList.add('hidden'); mapContainer.classList.remove('hidden');
-    initMap();  }
+    listBtn.classList.remove('active');
+    mapBtn.classList.add('active');
+    listContainer.classList.add('hidden');
+    mapContainer.classList.remove('hidden');
+    setTimeout(() => initMap(), 100);
+  }
 }
 
 async function init() {
   try {
-    const configRes = await fetch('config.json');
-    config = await configRes.json();
+    config = APP_CONFIG;
    
     if (config.data?.sheetUrl) {
       listings = await loadFromGoogleSheets(config.data.sheetUrl);
@@ -67,16 +84,19 @@ async function init() {
    
     tg?.MainButton?.setText(config.texts?.ctaButton || 'Получить консультацию');
     tg?.MainButton?.hide();
-    tg?.MainButton?.onClick(() => { if (currentModalId) sendConsultRequest(); });
+    tg?.MainButton?.onClick(() => {
+      if (currentModalId) sendConsultRequest();
+    });
   } catch (error) {
     console.error('Init Error:', error);
+    document.getElementById('listingsContainer').innerHTML =
+      '<div style="padding:20px;text-align:center;color:#c53030">Ошибка загрузки таблицы</div>';
   }
 }
 
 async function loadFromGoogleSheets(url) {
   let csvUrl = url.replace('pubhtml', 'pub');
-  if (!csvUrl.includes('output=csv')) {
-    csvUrl += (csvUrl.includes('?') ? '&' : '?') + 'output=csv';
+  if (!csvUrl.includes('output=csv')) {    csvUrl += (csvUrl.includes('?') ? '&' : '?') + 'output=csv';
   }
   const response = await fetch(csvUrl);
   return parseCSV(await response.text());
@@ -85,6 +105,7 @@ async function loadFromGoogleSheets(url) {
 function parseCSV(csv) {
   const lines = csv.trim().split('\n');
   if (lines.length < 2) return [];
+ 
   const headers = parseCSVLine(lines[0]).map(h => h.trim());
   const result = [];
  
@@ -92,11 +113,13 @@ function parseCSV(csv) {
     if (!lines[i].trim()) continue;
     const values = parseCSVLine(lines[i]);
     const obj = {};
+   
     headers.forEach((header, index) => {
       let value = values[index] !== undefined ? values[index].trim() : '';
       if (value === 'TRUE') value = true;
       else if (value === 'FALSE') value = false;
-      else if (!isNaN(value) && value !== '') value = Number(value);      obj[header] = value;
+      else if (!isNaN(value) && value !== '') value = Number(value);
+      obj[header] = value;
     });
     result.push(obj);
   }
@@ -107,20 +130,25 @@ function parseCSVLine(line) {
   const result = [];
   let current = '';
   let inQuotes = false;
+ 
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
     if (char === '"') inQuotes = !inQuotes;
-    else if (char === ',' && !inQuotes) { result.push(current); current = ''; }
-    else current += char;
+    else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
   }
   result.push(current);
   return result;
 }
 
-function applyTheme() {
-  if (!config.brand) return;
+function applyTheme() {  if (!config.brand) return;
   document.documentElement.style.setProperty('--primary', config.brand.primaryColor || '#1a365d');
   document.documentElement.style.setProperty('--accent', config.brand.accentColor || '#d4af37');
+ 
   const img = document.getElementById('welcomeImage');
   if (img && config.brand.welcomeImage) img.src = config.brand.welcomeImage;
 }
@@ -145,7 +173,8 @@ function renderFilters() {
       const label = document.createElement('label');
       label.className = 'checkbox-label';
       label.innerHTML = `<input type="checkbox" value="${escapeHtml(d)}" class="filter-checkbox" data-filter="district"><span>${escapeHtml(d)}</span>`;
-      districtContainer.appendChild(label);    });
+      districtContainer.appendChild(label);
+    });
   }
  
   // Метро
@@ -165,8 +194,7 @@ function renderFilters() {
   const roomsContainer = document.getElementById('roomsCheckboxes');
   if (roomsContainer) {
     const allRooms = [];
-    listings.forEach(l => {
-      if (l.rooms) {
+    listings.forEach(l => {      if (l.rooms) {
         const roomList = String(l.rooms).split(',').map(r => r.trim());
         roomList.forEach(r => { if (r && !allRooms.includes(r)) allRooms.push(r); });
       }
@@ -194,7 +222,10 @@ function renderFilters() {
       filterListings();
     });
   }
-    document.querySelectorAll('.filter-checkbox').forEach(cb => cb.addEventListener('change', filterListings));
+ 
+  document.querySelectorAll('.filter-checkbox').forEach(cb =>
+    cb.addEventListener('change', filterListings)
+  );
 }
 
 function filterListings() {
@@ -209,12 +240,10 @@ function filterListings() {
     if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
     if (selectedMetros.length > 0 && !selectedMetros.includes(item.metro)) return false;
    
-    // Фильтр по комнатам
     if (selectedRooms.length > 0 && item.rooms) {
       const itemRooms = String(item.rooms).split(',').map(r => r.trim());
       const hasMatch = selectedRooms.some(r => itemRooms.includes(r));
-      if (!hasMatch) return false;
-    }
+      if (!hasMatch) return false;    }
     return true;
   });
  
@@ -236,14 +265,14 @@ function renderListings(data) {
     const priceTo = typeof item.price_to === 'number' ? item.price_to.toFixed(1) : '';
     const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString('ru-RU') : '';
     const area = (typeof item.area_min === 'number' && typeof item.area_max === 'number')
-      ? `${item.area_min}–${item.area_max} м²`
-      : '';
+      ? `${item.area_min}–${item.area_max} м²` : '';
     const rooms = item.rooms || '';
     const statusKey = (item.status || 'other').toString().replace(/\s+/g, '-');
     const statusText = item.status === 'Сдан' ? '✅ Сдан' : item.status === 'Строится' ? '🏗 Строится' : '🟡 Частично сдан';
    
     const card = document.createElement('div');
-    card.className = 'listing-card';    card.onclick = function(e) {
+    card.className = 'listing-card';
+    card.onclick = function(e) {
       if (!e.target.closest('.consult-btn-inline')) openDetails(item.id);
     };
    
@@ -263,8 +292,7 @@ function renderListings(data) {
         </div>
         <div class="listing-status status-${statusKey}">${statusText}</div>
         <button class="tg-btn consult-btn-inline" onclick="openConsultForm('${item.id}', event)">📞 Получить консультацию</button>
-      </div>
-    `;
+      </div>    `;
     container.appendChild(card);
   });
 }
@@ -276,7 +304,9 @@ function initMap() {
  
   if (!map) {
     map = L.map('mapContainer').setView([59.9343, 30.3351], 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
   }
  
   markers.forEach(m => map.removeLayer(m));
@@ -292,7 +322,8 @@ function initMap() {
  
   if (markers.length > 0) {
     map.fitBounds(new L.featureGroup(markers).getBounds().pad(0.1));
-  }  setTimeout(() => map.invalidateSize(), 150);
+  }
+  setTimeout(() => map.invalidateSize(), 150);
 }
 
 function openDetails(id) {
@@ -303,14 +334,14 @@ function openDetails(id) {
   document.getElementById('modalTitle').textContent = item.name || '';
   const price = typeof item.price_from === 'number' ? item.price_from.toFixed(1) : '?';
   const ppsqm = typeof item.price_per_sqm === 'number' ? Math.round(item.price_per_sqm).toLocaleString('ru-RU') : '';
-  document.getElementById('modalPrice').innerHTML = `от <b>${price}</b> млн ₽${ppsqm ? ` <span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}`;
+ 
+  document.getElementById('modalPrice').innerHTML = `от <b>${price}</b> млн ₽${ppsqm ? `<span class="price-per-sqm">~${ppsqm} ₽/м²</span>` : ''}`;
  
   document.getElementById('modalMeta').innerHTML = `
     <div class="meta-row"><span>📍 ${escapeHtml(item.address) || ''}</span></div>
     <div class="meta-row"><span>🚇 ${escapeHtml(item.metro) || ''}</span></div>
     <div class="meta-row"><span>🏗 ${escapeHtml(item.class) || ''} • ${escapeHtml(item.finishing) || ''}</span></div>
-    <div class="meta-row"><span>📅 ${escapeHtml(item.completion_soonest || item.completion_all) || ''}</span></div>
-  `;
+    <div class="meta-row"><span>📅 ${escapeHtml(item.completion_soonest || item.completion_all) || ''}</span></div>  `;
  
   document.getElementById('modalDescription').textContent = item.description || 'Описание отсутствует';
  
@@ -332,7 +363,8 @@ function openDetails(id) {
     galleryDiv.className = 'floor-plans-gallery';
     item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url; img.className = 'floor-plan-image';
+      img.src = url;
+      img.className = 'floor-plan-image';
       img.onclick = () => window.open(url, '_blank');
       galleryDiv.appendChild(img);
     });
@@ -341,22 +373,24 @@ function openDetails(id) {
   if (!item.floor_plans_text && !item.floor_plans_images) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
-    const gallery = document.getElementById('modalGallery');
+ 
+  const gallery = document.getElementById('modalGallery');
   gallery.innerHTML = '';
   if (item.image_main) {
     const mainImg = document.createElement('img');
-    mainImg.src = item.image_main; mainImg.className = 'modal-main-image';
+    mainImg.src = item.image_main;
+    mainImg.className = 'modal-main-image';
     gallery.appendChild(mainImg);
   }
   if (item.images_gallery) {
     item.images_gallery.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url; img.className = 'modal-thumb';
+      img.src = url;
+      img.className = 'modal-thumb';
       img.onclick = () => window.open(url, '_blank');
       gallery.appendChild(img);
     });
-  }
- 
+  } 
   const modalContent = document.querySelector('#detailsModal .modal-content');
   let btn = document.getElementById('modalConsultBtn');
   if (!btn) {
@@ -390,7 +424,9 @@ function openConsultForm(id, event) {
 
 function sendConsultRequest() {
   const item = listings.find(l => l.id === currentModalId);
-  if (!item) return;  document.getElementById('consultObjectName').textContent = '🏢 ' + item.name;
+  if (!item) return;
+ 
+  document.getElementById('consultObjectName').textContent = '🏢 ' + item.name;
   document.getElementById('consultName').value = '';
   document.getElementById('consultPhone').value = '+7 (';
   document.getElementById('consultModal').classList.remove('hidden');
@@ -403,12 +439,15 @@ function closeConsultModal() {
 
 function initPhoneMask() {
   const phoneInput = document.getElementById('consultPhone');
-  if (!phoneInput) return;
+  if (!phoneInput) return; 
   phoneInput.addEventListener('input', function(e) {
     let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
     e.target.value = !x[2] ? '+7 (' : '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
   });
-  phoneInput.addEventListener('focus', function(e) { if (e.target.value === '') e.target.value = '+7 ('; });
+ 
+  phoneInput.addEventListener('focus', function(e) {
+    if (e.target.value === '') e.target.value = '+7 (';
+  });
 }
 
 function submitConsultForm(event) {
@@ -424,36 +463,18 @@ function submitConsultForm(event) {
     return;
   }
  
-  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
-  const CHAT_ID = '2038206387';
-  const text = '🔔 Новая заявка!\n\n🏢 ' + item.name + '\n👤 ' + name + '\n📱 ' + phone;
+  // ✅ БЕЗОПАСНО: открываем чат с ботом вместо отправки через API
+  const prefillText = `Здравствуйте! Интересует объект: ${item.name}.\nМоё имя: ${name}, телефон: ${phone}`;
+  const botLink = config.contact?.botLink || 'https://t.me/demo_newbuilds_bot';
  
-  const submitBtn = event.target.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-  submitBtn.textContent = 'Отправка...';
-  submitBtn.disabled = true;
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(botLink + '?start=' + encodeURIComponent(prefillText));
+  } else {
+    window.open(botLink, '_blank');
+  }
  
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: CHAT_ID, text: text })
-  })
-  .then(res => res.json())
-  .then(data => {    if (data.ok) {
-      closeConsultModal();
-      tg?.showAlert('✅ Заявка отправлена!');
-      event.target.reset();
-    } else {
-      tg?.showAlert('❌ Ошибка: ' + (data.description || 'Неизвестная'));
-    }
-  })
-  .catch(() => {
-    tg?.showAlert('❌ Ошибка сети');
-  })
-  .finally(() => {
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-  });
+  closeConsultModal();
+  tg?.showAlert(config.texts?.successMsg || '✅ Вы будете перенаправлены в чат с менеджером');
 }
 
 function escapeHtml(text) {
