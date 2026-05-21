@@ -168,33 +168,38 @@ function renderFilters() {
       roomsContainer.appendChild(label);
     });
   }
-  const priceFilter = document.getElementById('priceFilter');
-  const priceValue = document.getElementById('priceValue');
-  if (priceFilter && priceValue) {
-    const maxP = config.filters?.defaults?.maxPrice || 50;
-    priceFilter.max = maxP;
-    priceFilter.value = maxP;
-    priceValue.textContent = maxP;
-    priceFilter.addEventListener('input', e => {
-      priceValue.textContent = e.target.value;
+ 
+  // Кнопки цены
+  document.querySelectorAll('.price-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (this.classList.contains('active')) {
+        this.classList.remove('active');
+      } else {
+        document.querySelectorAll('.price-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      }
       filterListings();
     });
-  }
+  });
+ 
   document.querySelectorAll('.filter-checkbox').forEach(cb => cb.addEventListener('change', filterListings));
 }
 
 function filterListings() {
-  const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 50);
+  const activeBtn = document.querySelector('.price-btn.active');
+  const maxPrice = activeBtn ? parseFloat(activeBtn.dataset.price) : Infinity;
+ 
   const selectedDistricts = Array.from(document.querySelectorAll('input[data-filter="district"]:checked')).map(cb => cb.value);
   const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);
   const selectedRooms = Array.from(document.querySelectorAll('input[data-filter="rooms"]:checked')).map(cb => cb.value);
+ 
   const filtered = listings.filter(item => {
-    if (!item.active) return false;
-    if (typeof item.price_from !== 'number' || item.price_from > maxPrice) return false;
+    if (!item.active) return false;    if (typeof item.price_from !== 'number' || item.price_from > maxPrice) return false;
     if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
     if (selectedMetros.length > 0 && !selectedMetros.includes(item.metro)) return false;
     if (selectedRooms.length > 0 && item.rooms) {
-      const itemRooms = String(item.rooms).split(',').map(r => r.trim());      const hasMatch = selectedRooms.some(r => itemRooms.includes(r));
+      const itemRooms = String(item.rooms).split(',').map(r => r.trim());
+      const hasMatch = selectedRooms.some(r => itemRooms.includes(r));
       if (!hasMatch) return false;
     }
     return true;
@@ -238,12 +243,12 @@ function renderListings(data) {
 function initMap() {
   if (typeof L === 'undefined') return;
   const mapContainer = document.getElementById('mapContainer');
-  if (!mapContainer) return;
-  if (!map) {
+  if (!mapContainer) return;  if (!map) {
     map = L.map('mapContainer').setView([59.9343, 30.3351], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
   }
-  markers.forEach(m => map.removeLayer(m));  markers = [];
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
   const activeListings = listings.filter(l => l.active && l.lat && l.lng);
   activeListings.forEach(item => {
     let priceDisplay = '?';
@@ -287,12 +292,12 @@ function openDetails(id) {
     galleryDiv.className = 'floor-plans-gallery';
     item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
-      img.src = url;
-      img.className = 'floor-plan-image';
+      img.src = url;      img.className = 'floor-plan-image';
       img.onclick = () => window.open(url, '_blank');
       galleryDiv.appendChild(img);
     });
-    plansContainer.appendChild(galleryDiv);  }
+    plansContainer.appendChild(galleryDiv);
+  }
   if (!item.floor_plans_text && !item.floor_plans_images) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
@@ -336,12 +341,12 @@ function closeModal() {
 }
 
 function openConsultForm(id, event) {
-  if (event) event.stopPropagation();
-  currentModalId = id;
+  if (event) event.stopPropagation();  currentModalId = id;
   sendConsultRequest();
 }
 
-function sendConsultRequest() {  const item = listings.find(l => l.id === currentModalId);
+function sendConsultRequest() {
+  const item = listings.find(l => l.id === currentModalId);
   if (!item) return;
   document.getElementById('consultObjectName').textContent = '🏢 ' + item.name;
   document.getElementById('consultName').value = '';
@@ -375,7 +380,6 @@ function submitConsultForm(event) {
     return;
   }
  
-  // ОТПРАВКА ЧЕРЕЗ БОТА
   const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
   const CHAT_ID = '2038206387';
   const text = `🔔 Новая заявка!\n\n🏢 ${item.name}\n👤 ${name}\n📱 ${phone}`;
@@ -386,11 +390,11 @@ function submitConsultForm(event) {
   submitBtn.disabled = true;
  
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST',    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ chat_id: CHAT_ID, text: text })
   })
-  .then(res => res.json())  .then(data => {
+  .then(res => res.json())
+  .then(data => {
     if (data.ok) {
       closeConsultModal();
       tg?.showAlert('✅ Заявка отправлена!');
