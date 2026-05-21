@@ -132,8 +132,7 @@ function renderWelcome() {
     document.getElementById('mainContent')?.classList.remove('hidden');
     return;
   }
-  document.getElementById('welcomeTitle').textContent = config.brand.welcomeTitle || '';
-  document.getElementById('welcomeSubtitle').textContent = config.brand.welcomeSubtitle || '';
+
 }
 
 function renderFilters() {
