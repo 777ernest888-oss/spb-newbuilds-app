@@ -24,7 +24,6 @@ let markers = [];
 function startApp() {
   document.getElementById('welcomeScreen')?.classList.add('hidden');
   document.getElementById('mainContent')?.classList.remove('hidden');
-  tg?.MainButton?.show();
   window.scrollTo(0, 0);
 }
 
@@ -47,8 +46,8 @@ function switchView(view) {
     mapBtn.classList.remove('active');
     listContainer.classList.remove('hidden');
     mapContainer.classList.add('hidden');
-  } else {    listBtn.classList.remove('active');
-    mapBtn.classList.add('active');
+  } else {
+    listBtn.classList.remove('active');    mapBtn.classList.add('active');
     listContainer.classList.add('hidden');
     mapContainer.classList.remove('hidden');
     setTimeout(() => initMap(), 100);
@@ -67,9 +66,6 @@ async function init() {
     renderFilters();
     renderListings(listings.filter(l => l.active));
     initPhoneMask();
-    tg?.MainButton?.setText(config.texts?.ctaButton || 'Получить консультацию');
-    tg?.MainButton?.hide();
-    tg?.MainButton?.onClick(() => { if (currentModalId) sendConsultRequest(); });
   } catch (error) {
     console.error('Init Error:', error);
   }
@@ -96,11 +92,11 @@ function parseCSV(csv) {
     headers.forEach((header, index) => {
       let value = values[index] !== undefined ? values[index].trim() : '';
       if (value === 'TRUE') value = true;
-      else if (value === 'FALSE') value = false;      else if (!isNaN(value) && value !== '') value = Number(value);
+      else if (value === 'FALSE') value = false;
+      else if (!isNaN(value) && value !== '') value = Number(value);
       obj[header] = value;
     });
-    result.push(obj);
-  }
+    result.push(obj);  }
   return result;
 }
 
@@ -122,8 +118,6 @@ function applyTheme() {
   if (!config.brand) return;
   document.documentElement.style.setProperty('--primary', config.brand.primaryColor || '#1a365d');
   document.documentElement.style.setProperty('--accent', config.brand.accentColor || '#d4af37');
-  const img = document.getElementById('welcomeImage');
-  if (img && config.brand.welcomeImage) img.src = config.brand.welcomeImage;
 }
 
 function renderWelcome() {
@@ -132,7 +126,6 @@ function renderWelcome() {
     document.getElementById('mainContent')?.classList.remove('hidden');
     return;
   }
-
 }
 
 function renderFilters() {
@@ -144,15 +137,15 @@ function renderFilters() {
       const label = document.createElement('label');
       label.className = 'checkbox-label';
       label.innerHTML = `<input type="checkbox" value="${escapeHtml(d)}" class="filter-checkbox" data-filter="district"><span>${escapeHtml(d)}</span>`;
-      districtContainer.appendChild(label);    });
+      districtContainer.appendChild(label);
+    });
   }
   const metros = [...new Set(listings.map(l => l.metro).filter(Boolean))].sort();
   const metroContainer = document.getElementById('metroCheckboxes');
   if (metroContainer) {
     metroContainer.innerHTML = '';
     metros.forEach(m => {
-      const label = document.createElement('label');
-      label.className = 'checkbox-label';
+      const label = document.createElement('label');      label.className = 'checkbox-label';
       label.innerHTML = `<input type="checkbox" value="${escapeHtml(m)}" class="filter-checkbox" data-filter="metro"><span>${escapeHtml(m)}</span>`;
       metroContainer.appendChild(label);
     });
@@ -193,15 +186,15 @@ function renderFilters() {
 function filterListings() {
   const maxPrice = parseFloat(document.getElementById('priceFilter')?.value || 50);
   const selectedDistricts = Array.from(document.querySelectorAll('input[data-filter="district"]:checked')).map(cb => cb.value);
-  const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);  const selectedRooms = Array.from(document.querySelectorAll('input[data-filter="rooms"]:checked')).map(cb => cb.value);
+  const selectedMetros = Array.from(document.querySelectorAll('input[data-filter="metro"]:checked')).map(cb => cb.value);
+  const selectedRooms = Array.from(document.querySelectorAll('input[data-filter="rooms"]:checked')).map(cb => cb.value);
   const filtered = listings.filter(item => {
     if (!item.active) return false;
     if (typeof item.price_from !== 'number' || item.price_from > maxPrice) return false;
     if (selectedDistricts.length > 0 && !selectedDistricts.includes(item.district)) return false;
     if (selectedMetros.length > 0 && !selectedMetros.includes(item.metro)) return false;
     if (selectedRooms.length > 0 && item.rooms) {
-      const itemRooms = String(item.rooms).split(',').map(r => r.trim());
-      const hasMatch = selectedRooms.some(r => itemRooms.includes(r));
+      const itemRooms = String(item.rooms).split(',').map(r => r.trim());      const hasMatch = selectedRooms.some(r => itemRooms.includes(r));
       if (!hasMatch) return false;
     }
     return true;
@@ -218,7 +211,6 @@ function renderListings(data) {
     return;
   }
   data.forEach(item => {
-    // ИСПРАВЛЕНИЕ ЦЕНЫ
     let priceDisplay = '?';
     if (typeof item.price_from === 'number') {
       if (item.price_from < 1000) {
@@ -242,6 +234,7 @@ function renderListings(data) {
     container.appendChild(card);
   });
 }
+
 function initMap() {
   if (typeof L === 'undefined') return;
   const mapContainer = document.getElementById('mapContainer');
@@ -250,8 +243,7 @@ function initMap() {
     map = L.map('mapContainer').setView([59.9343, 30.3351], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
   }
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
+  markers.forEach(m => map.removeLayer(m));  markers = [];
   const activeListings = listings.filter(l => l.active && l.lat && l.lng);
   activeListings.forEach(item => {
     let priceDisplay = '?';
@@ -291,7 +283,8 @@ function openDetails(id) {
     plansContainer.appendChild(textDiv);
   }
   if (item.floor_plans_images) {
-    const galleryDiv = document.createElement('div');    galleryDiv.className = 'floor-plans-gallery';
+    const galleryDiv = document.createElement('div');
+    galleryDiv.className = 'floor-plans-gallery';
     item.floor_plans_images.split(',').map(u => u.trim()).filter(Boolean).forEach(url => {
       const img = document.createElement('img');
       img.src = url;
@@ -299,8 +292,7 @@ function openDetails(id) {
       img.onclick = () => window.open(url, '_blank');
       galleryDiv.appendChild(img);
     });
-    plansContainer.appendChild(galleryDiv);
-  }
+    plansContainer.appendChild(galleryDiv);  }
   if (!item.floor_plans_text && !item.floor_plans_images) {
     plansContainer.innerHTML = '<p style="color: var(--text-secondary)">Информация уточняется</p>';
   }
@@ -335,13 +327,12 @@ function openDetails(id) {
   btn.onclick = () => openConsultForm(id);
   document.getElementById('detailsModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
-  tg?.MainButton?.show();
 }
 
 function closeModal() {
   document.getElementById('detailsModal').classList.add('hidden');
-  document.body.style.overflow = '';  currentModalId = null;
-  tg?.MainButton?.hide();
+  document.body.style.overflow = '';
+  currentModalId = null;
 }
 
 function openConsultForm(id, event) {
@@ -350,8 +341,7 @@ function openConsultForm(id, event) {
   sendConsultRequest();
 }
 
-function sendConsultRequest() {
-  const item = listings.find(l => l.id === currentModalId);
+function sendConsultRequest() {  const item = listings.find(l => l.id === currentModalId);
   if (!item) return;
   document.getElementById('consultObjectName').textContent = '🏢 ' + item.name;
   document.getElementById('consultName').value = '';
@@ -389,7 +379,8 @@ function submitConsultForm(event) {
     tg.openLink(botLink);
   } else {
     window.open(botLink, '_blank');
-  }  closeConsultModal();
+  }
+  closeConsultModal();
   tg?.showAlert('✅ Вы будете перенаправлены в чат с менеджером');
 }
 
@@ -399,7 +390,6 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
-
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
