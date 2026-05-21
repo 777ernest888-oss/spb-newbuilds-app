@@ -166,21 +166,24 @@ body {
 }
 
 .price-btn {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border: 2px solid var(--border);
   background: white;
-  border-radius: 8px;
-  font-size: 13px;
+  color: var(--text-secondary);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   font-family: inherit;
-  color: var(--text);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .price-btn:hover {
-  background: var(--primary);
-  color: white;
   border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(26, 54, 93, 0.15);
 }
 
 .price-btn.active {
@@ -188,13 +191,27 @@ body {
   color: white;
   border-color: var(--primary);
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(26, 54, 93, 0.3);
+  transform: translateY(0);
+}
+.price-btn:not(.active) {
+  background: #f8f9fa;
+  color: #a0aec0;
+  border-color: #e2e8f0;
+}
+
+.price-btn:not(.active):hover {
+  background: white;
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* Checkbox Group */
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;}
+  gap: 8px;
+}
 
 .checkbox-label {
   display: flex;
@@ -226,8 +243,7 @@ body {
 .view-toggle {
   display: flex;
   gap: 12px;
-  padding: 16px;
-  background: white;
+  padding: 16px;  background: white;
   border-bottom: 1px solid var(--border);
 }
 
@@ -243,7 +259,8 @@ body {
   transition: all 0.3s;
   display: flex;
   align-items: center;
-  justify-content: center;  gap: 6px;
+  justify-content: center;
+  gap: 6px;
 }
 
 .view-btn.active {
@@ -275,8 +292,7 @@ body {
 }
 
 .listing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .listing-image {
@@ -292,7 +308,8 @@ body {
 .listing-info h3 {
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 8px;  color: var(--text);
+  margin-bottom: 8px;
+  color: var(--text);
 }
 
 .listing-meta {
@@ -324,8 +341,7 @@ body {
   margin-left: 8px;
 }
 
-.listing-status {
-  display: inline-block;
+.listing-status {  display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -342,6 +358,7 @@ body {
   background: #d4edda;
   color: #155724;
 }
+
 .status-Частично-сдан {
   background: #fff3cd;
   color: #856404;
@@ -373,8 +390,7 @@ body {
 }
 
 /* Map Container */
-.map-container {
-  height: calc(100vh - 200px);
+.map-container {  height: calc(100vh - 200px);
   width: 100%;
 }
 
@@ -390,7 +406,8 @@ body {
   overflow-y: auto;
 }
 
-.modal-content {  background: white;
+.modal-content {
+  background: white;
   width: 100%;
   max-width: 600px;
   border-radius: 20px 20px 0 0;
@@ -422,8 +439,7 @@ body {
   border-radius: 50%;
   font-size: 18px;
   cursor: pointer;
-  z-index: 10;
-  display: flex;
+  z-index: 10;  display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
@@ -440,6 +456,7 @@ body {
   padding: 16px;
   background: var(--bg);
 }
+
 .modal-main-image {
   width: 100%;
   height: 250px;
@@ -471,8 +488,7 @@ body {
   color: var(--text);
 }
 
-.modal-price {
-  font-size: 24px;
+.modal-price {  font-size: 24px;
   font-weight: 700;
   color: var(--primary);
   margin-bottom: 16px;
@@ -488,7 +504,8 @@ body {
 }
 
 .meta-row {
-  font-size: 14px;  color: var(--text-secondary);
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
 .modal-body h3 {
@@ -520,8 +537,7 @@ body {
 
 .modal-features li:before {
   content: "✓";
-  position: absolute;
-  left: 0;
+  position: absolute;  left: 0;
   color: var(--success);
   font-weight: bold;
 }
@@ -538,6 +554,7 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 12px;
 }
+
 .floor-plan-image {
   width: 100%;
   height: auto;
@@ -569,8 +586,7 @@ body {
   margin-bottom: 8px;
 }
 
-.form-hint {
-  font-size: 13px;
+.form-hint {  font-size: 13px;
   color: var(--text-secondary);
   margin-bottom: 20px;
 }
@@ -586,7 +602,8 @@ body {
   border: 2px solid var(--border);
   border-radius: 8px;
   font-size: 15px;
-  transition: border-color 0.3s;}
+  transition: border-color 0.3s;
+}
 
 #consultForm input:focus {
   outline: none;
@@ -618,8 +635,7 @@ body {
   .listing-price {
     font-size: 18px;
   }
- 
-  .modal-body h2 {
+    .modal-body h2 {
     font-size: 20px;
   }
  
@@ -636,6 +652,7 @@ body {
 ::-webkit-scrollbar-track {
   background: var(--bg);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
