@@ -374,14 +374,38 @@ function submitConsultForm(event) {
     tg?.showAlert('❌ Введите корректный номер телефона');
     return;
   }
-  const botLink = config.contact?.botLink || 'https://t.me/demo_newbuilds_bot';
-  if (tg?.openLink) {
-    tg.openLink(botLink);
-  } else {
-    window.open(botLink, '_blank');
-  }
-  closeConsultModal();
-  tg?.showAlert('✅ Вы будете перенаправлены в чат с менеджером');
+ 
+  // ОТПРАВКА ЧЕРЕЗ БОТА
+  const BOT_TOKEN = '8974676618:AAEfWzu9ezT6DxgSJsr6l7URMm4k6iF3WQM';
+  const CHAT_ID = '2038206387';
+  const text = `🔔 Новая заявка!\n\n🏢 ${item.name}\n👤 ${name}\n📱 ${phone}`;
+ 
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Отправка...';
+  submitBtn.disabled = true;
+ 
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+  })
+  .then(res => res.json())  .then(data => {
+    if (data.ok) {
+      closeConsultModal();
+      tg?.showAlert('✅ Заявка отправлена!');
+      event.target.reset();
+    } else {
+      tg?.showAlert('❌ Ошибка: ' + (data.description || 'Неизвестная'));
+    }
+  })
+  .catch(() => {
+    tg?.showAlert('❌ Ошибка сети');
+  })
+  .finally(() => {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  });
 }
 
 function escapeHtml(text) {
@@ -390,6 +414,7 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
