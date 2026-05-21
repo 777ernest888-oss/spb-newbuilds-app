@@ -1,40 +1,41 @@
-{
-  "brand": {
-    "name": "Новостройки СПб",
-    "welcomeImage": "./welcome.png",
-    "welcomeTitle": "Подберём квартиру под ваш бюджет",
-    "welcomeSubtitle": "Каталог проверенных новостроек Санкт-Петербурга",
-    "primaryColor": "#1a365d",
-    "accentColor": "#d4af37"
+const APP_CONFIG = {
+  // 🎨 1. БРЕНДИНГ (меняйте под клиента)
+  brand: {
+    name: "Demo NewBuilds",
+    primaryColor: "#1a365d",
+    accentColor: "#d4af37",
+    welcomeImage: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+    welcomeTitle: "Каталог новостроек",
+    welcomeSubtitle: "Подберём квартиру под ваш бюджет"
   },
-  "data": {
-    "source": "google_sheets",
-    "sheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTAJn5ah-8UjagF2CloZWriSpKLyMkD5RxLzYOHC7PCtcCe33iTs5NvqM2dLs8QLCuMIrkIOytK0PWy/pubhtml",
-    "activeColumn": "active"
+ 
+  // 📊 2. ДАННЫЕ (вставьте ID таблицы клиента)
+  data: {
+    sheetUrl: "https://docs.google.com/spreadsheets/d/1z7d0dv5o_JKVfIQgn38rHoAywZazadRSvJQFeQgV3eM/export?format=csv&gid=0"
   },
-  "filters": {
-    "enabled": ["district", "metro", "price", "rooms", "status", "class", "finishing"],
-    "defaults": {
-      "district": [],
-      "metro": [],
-      "minPrice": 0,
-      "maxPrice": 500,
-      "rooms": "all",
-      "status": "all",
-      "class": "all",
-      "finishing": "all"
+ 
+  // 📱 3. TELEGRAM BOT (ссылка на бота для заявок)
+  contact: {
+    botLink: "https://t.me/demo_newbuilds_bot"
+  },
+ 
+  // 📝 4. ТЕКСТЫ
+  texts: {
+    ctaButton: "Получить консультацию",
+    emptyState: "Нет объектов по выбранным фильтрам",
+    successMsg: "✅ Вы будете перенаправлены в чат с менеджером"
+  },
+ 
+  // ⚙️ 5. НАСТРОЙКИ
+  features: {
+    showWelcomeScreen: true,
+    showMap: true,
+    showFilters: true
+  },
+ 
+  filters: {
+    defaults: {
+      maxPrice: 50
     }
-  },
-  "features": {
-    "showWelcomeScreen": true,
-    "showMap": true,
-    "showCalculator": false,
-    "showBookingForm": true
-  },
-  "texts": {
-    "ctaButton": "Получить консультацию",
-    "emptyState": "Нет объектов по заданным фильтрам. Попробуйте расширить поиск.",
-    "mapToggle": "🗺 Карта",
-    "listToggle": "📋 Список"
   }
-}
+};
