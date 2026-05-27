@@ -335,7 +335,7 @@ function renderListings(data) {
     if (ppsqm) html += ' <span class="price-per-sqm">~' + ppsqm + ' ₽/м²</span>';
     html += '</div>';
     html += '<div class="listing-status status-' + statusKey + '">' + statusTxt + '</div>';
-    html += '<button class="tg-btn consult-btn-inline" onclick="openConsultForm(\'' + item.id + '\', event)">📍 Получить консультацию</button>';
+    html += '<button class="tg-btn consult-btn-inline" onclick="openConsultForm(\'' + item.id + '\', event)"> Получить консультацию</button>';
     html += '</div>';
   
     card.innerHTML = html;
@@ -371,7 +371,9 @@ function updateMarkers(items) {
 function openDetails(id) {
   const item = listings.find(function(l) { return l.id === id; });
   if (!item) return;
+ 
   currentModalId = id;
+  window.currentModalId = id; // Делаем ID доступным для HTML кнопки
 
   document.getElementById('modalTitle').textContent = item.name || '';
 
@@ -385,12 +387,12 @@ function openDetails(id) {
 
   document.getElementById('modalMeta').innerHTML =
     '<div class="meta-row"><span>📍 ' + (item.address || '') + '</span></div>' +
-    '<div class="meta-row"><span>🚇 ' + (item.metro || '') + '</span></div>' +
+    '<div class="meta-row"><span> ' + (item.metro || '') + '</span></div>' +
     (item.class ? '<div class="meta-row"><span>🌟 Класс: ' + item.class + '</span></div>' : '') +
     (item.finishing ? '<div class="meta-row"><span>🔨 Отделка: ' + item.finishing + '</span></div>' : '') +
     '<div class="meta-row"><span>' + (item.completion_soonest || item.completion_all || '') + '</span></div>';
-
   document.getElementById('modalDescription').textContent = item.description || 'Описание отсутствует';
+
   const featuresEl = document.getElementById('modalFeatures');
   if (item.features) {
     featuresEl.innerHTML = '<ul>' + item.features.split(',').map(function(f) { return '<li>' + f.trim() + '</li>'; }).join('') + '</ul>';
@@ -437,22 +439,7 @@ function openDetails(id) {
       img.className = 'modal-thumb';
       img.onclick = function() { window.open(url, '_blank'); };
       gallery.appendChild(img);
-    });
-  }
-    // === ИСПРАВЛЕННАЯ КНОПКА КОНСУЛЬТАЦИИ ===
-  setTimeout(function() {
-    const btn = document.getElementById('modalConsultBtn');
-    if (btn) {
-      // Удаляем все старые обработчики
-      const newBtn = btn.cloneNode(true);
-      btn.parentNode.replaceChild(newBtn, btn);
-     
-      // Добавляем новый обработчик
-      newBtn.addEventListener('click', function() {
-        openConsultForm(currentModalId);
-      });
-    }
-  }, 100);
+    });  }
 
   document.getElementById('detailsModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -470,9 +457,12 @@ function closeModal() {
 function openConsultForm(id, e) {
   if (e) e.stopPropagation();
   currentModalId = id;
+  window.currentModalId = id;
+ 
   const item = listings.find(function(l) { return l.id === id; });
   if (!item) return;
-  document.getElementById('consultObjectName').textContent = '🏢 ' + item.name;
+ 
+  document.getElementById('consultObjectName').textContent = ' ' + item.name;
   document.getElementById('consultName').value = '';
   document.getElementById('consultPhone').value = '+7 (';
   document.getElementById('consultTelegram').value = '';
@@ -488,7 +478,8 @@ function closeConsultModal() {
   const mapCont = document.getElementById('mapContainer');
   if (details && details.classList.contains('hidden') && mapCont && mapCont.classList.contains('hidden')) {
     hideBack();
-  }}
+  }
+}
 
 function initPhoneMask() {
   const inp = document.getElementById('consultPhone');
@@ -497,8 +488,7 @@ function initPhoneMask() {
     let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
     if (!x) return;
     e.target.value = !x[2] ? '+7 (' : '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
-  });
-  inp.addEventListener('focus', function(e) {
+  });  inp.addEventListener('focus', function(e) {
     if (e.target.value === '' || e.target.value === '+7 ') {
       e.target.value = '+7 (';
     }
@@ -537,7 +527,8 @@ function submitConsultForm(e) {
 
   if (name.length < 2) {
     if (tg && tg.showAlert) tg.showAlert('❌ Введите имя (мин. 2 символа)');
-    return;  }
+    return;
+  }
   if (phone.replace(/\D/g, '').length < 10) {
     if (tg && tg.showAlert) tg.showAlert('❌ Введите корректный номер телефона');
     return;
@@ -547,15 +538,12 @@ function submitConsultForm(e) {
   const orig = btn.textContent;
   btn.textContent = 'Отправка...';
   btn.disabled = true;
-
-  // === ФОРМАТ КАК В SPB_NEWBUILDS (только объект, имя, телефон, телеграм) ===
   fetch(GOOGLE_SCRIPT_URL, {
     method: 'POST',
     body: JSON.stringify({
       secret: SECRET_KEY,
       projectId: PROJECT_ID,
       title: item.name,
-      // Поля price и city НЕ отправляем, чтобы скрипт не показывал их в сообщении
       leadName: name,
       leadPhone: phone,
       leadTelegram: telegram || 'Не указан'
@@ -587,6 +575,7 @@ function escapeHtml(text) {
   d.textContent = text;
   return d.innerHTML;
 }
+
 // === ЗАПУСК ПРИ ЗАГРУЗКЕ ===
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
