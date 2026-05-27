@@ -9,7 +9,7 @@ let markers = [];
 // === НАСТРОЙКИ ===
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiuUMeslxZOUBC2Y4sg2QqJe_Iy5u8qA3WE7j3sWfuvWmzXz8P807FK9m7Q5YFiWs2/exec';
 const SECRET_KEY = 'SecretParol999';
-const PROJECT_ID = 'novozhilov';
+const PROJECT_ID = 'spb-newbuilds-app';
 
 // === TELEGRAM ===
 try {
