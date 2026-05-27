@@ -16,7 +16,7 @@
         crossorigin="anonymous"/>
 
   <!-- Наши стили -->
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
 
@@ -31,7 +31,7 @@
   <!--  ОСНОВНОЙ КОНТЕНТ -->
   <div id="mainContent" class="hidden">
   
-    <!-- 🔍 ФИЛЬТРЫ -->
+    <!--  ФИЛЬТРЫ -->
     <button class="tg-btn filters-toggle-btn" onclick="toggleFilters()" type="button">🔽 Фильтры</button>
   
     <div id="filtersBlock" class="filters hidden">
@@ -61,7 +61,7 @@
 
     <!-- 🔀 ПЕРЕКЛЮЧАТЕЛЬ ВИДА -->
     <div class="view-toggle">
-      <button id="listViewBtn" class="active" onclick="switchView('list')" type="button">📋 Список</button>
+      <button id="listViewBtn" class="active" onclick="switchView('list')" type="button"> Список</button>
       <button id="mapViewBtn" onclick="switchView('map')" type="button">🗺 Карта</button>
     </div>
 
@@ -96,9 +96,9 @@
         <h3>📐 Планировки</h3>
         <div id="modalFloorPlans"></div>
       </div>
-      <!-- 🔥 КНОПКА КОНСУЛЬТАЦИИ (ДОБАВЛЕНА) 🔥 -->
-      <button id="modalConsultBtn" class="tg-btn modal-cta" type="button">📍 Получить консультацию</button>
-      <!-- 🔥 КОНЕЦ ДОБАВЛЕНИЯ 🔥 -->
+      <!-- 🔥 КНОПКА (ТЕПЕРЬ С ONCLICK) 🔥 -->
+      <button class="tg-btn modal-cta" type="button" onclick="openConsultForm(currentModalId)">📍 Получить консультацию</button>
+      <!-- 🔥 КОНЕЦ  -->
 
     </div>
   </div>
@@ -137,7 +137,7 @@
           crossorigin="anonymous"></script>
 
   <!-- Наш скрипт -->
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 
 </body>
 </html>
