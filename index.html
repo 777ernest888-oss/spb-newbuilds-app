@@ -16,11 +16,11 @@
         crossorigin="anonymous"/>
 
   <!-- Наши стили -->
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
 
-  <!-- 🏠 ЭКРАН ПРИВЕТСТВИЯ -->
+  <!--  ЭКРАН ПРИВЕТСТВИЯ -->
   <div id="welcomeScreen">
     <img id="welcomeImage" src="welcome.png" alt="Welcome" class="welcome-image" loading="lazy">
     <h1 id="welcomeTitle">Каталог новостроек</h1>
@@ -31,8 +31,8 @@
   <!--  ОСНОВНОЙ КОНТЕНТ -->
   <div id="mainContent" class="hidden">
   
-    <!--  ФИЛЬТРЫ -->
-    <button class="tg-btn filters-toggle-btn" onclick="toggleFilters()" type="button">🔽 Фильтры</button>
+    <!-- 🔍 ФИЛЬТРЫ -->
+    <button class="tg-btn filters-toggle-btn" onclick="toggleFilters()" type="button"> Фильтры</button>
   
     <div id="filtersBlock" class="filters hidden">
       <!-- Цена -->
@@ -48,7 +48,7 @@
         <div id="districtCheckboxes" class="checkbox-group"></div>
       </div>
       <!-- Метро -->      <div class="filter-group">
-        <label>🚇 Метро</label>
+        <label> Метро</label>
         <div id="metroCheckboxes" class="checkbox-group"></div>
       </div>
 
@@ -61,11 +61,11 @@
 
     <!-- 🔀 ПЕРЕКЛЮЧАТЕЛЬ ВИДА -->
     <div class="view-toggle">
-      <button id="listViewBtn" class="active" onclick="switchView('list')" type="button"> Список</button>
-      <button id="mapViewBtn" onclick="switchView('map')" type="button">🗺 Карта</button>
+      <button id="listViewBtn" class="active" onclick="switchView('list')" type="button">📋 Список</button>
+      <button id="mapViewBtn" onclick="switchView('map')" type="button"> Карта</button>
     </div>
 
-    <!--  КОНТЕЙНЕРЫ -->
+    <!-- 📦 КОНТЕЙНЕРЫ -->
     <div id="listingsContainer"></div>
     <div id="mapContainer" class="hidden"></div>
   </div>
@@ -96,9 +96,9 @@
         <h3>📐 Планировки</h3>
         <div id="modalFloorPlans"></div>
       </div>
-      <!-- 🔥 КНОПКА (ТЕПЕРЬ С ONCLICK) 🔥 -->
+      <!-- 🔥 КНОПКА (ИСПРАВЛЕНА)  -->
       <button class="tg-btn modal-cta" type="button" onclick="openConsultForm(currentModalId)">📍 Получить консультацию</button>
-      <!-- 🔥 КОНЕЦ  -->
+      <!-- 🔥 КОНЕЦ 🔥 -->
 
     </div>
   </div>
@@ -125,6 +125,13 @@
           <label>Телефон *</label>
           <input type="tel" id="consultPhone" placeholder="+7 (___) ___-__-__" required autocomplete="tel">
         </div>
+
+        <!-- 🔥 ЭТО ПОЛЕ Я ВЕРНУЛ 🔥 -->
+        <div class="filter-group">
+          <label>Telegram (необязательно)</label>
+          <input type="text" id="consultTelegram" placeholder="@username">
+        </div>
+        <!--  КОНЕЦ 🔥 -->
       
         <button type="submit" class="tg-btn" style="margin-top: 20px;">Отправить заявку</button>
       </form>
@@ -137,7 +144,6 @@
           crossorigin="anonymous"></script>
 
   <!-- Наш скрипт -->
-  <script src="app.js?v=7"></script>
-
+  <script src="app.js?v=8"></script>
 </body>
 </html>
