@@ -1,6 +1,7 @@
 {
   "brand": {
     "name": "Demo NewBuilds",
+    "logo": "logo.png",
     "primaryColor": "#1a365d",
     "accentColor": "#d4af37",
     "welcomeTitle": "Каталог новостроек",
