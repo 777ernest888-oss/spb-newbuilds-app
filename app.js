@@ -424,8 +424,8 @@ function submitConsultForm(event) {
     if (!telegram.startsWith('@')) telegram = '@' + telegram;
   }
 
-  const GOOGLE_SCRIPT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSs0IIptZEaBOyYYnhWKvcpjfhGbcvoASS2qJHEg_B5_ZsxM7cPmuq2XoywHqToe3MLM722DWhfT2wB/pub?output=csv';
-  const SECRET_KEY = 'ВСТАВЬ_СЮДА_БОЕВОЙ_SECRET_KEY';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx3cZ69_siYWU5SDAxHrp58sX_ZZux1-Tmfgx5HCRwC0tUcE0bn9qWYt4dI_3MqNms2/exec';
+  const SECRET_KEY = 'SecretParol999';
 
   const submitBtn = event.target.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
