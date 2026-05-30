@@ -6,7 +6,7 @@ const AGENT_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSs
 const PAGES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSs0IIptZEaBOyYYnhWKvcpjfhGbcvoASS2qJHEg_B5_ZsxM7cPmuq2XoywHqToe3MLM722DWhfT2wB/pub?gid=1650201238&single=true&output=csv';
 // ==========================================
 // 🔑 СКРИПТ ДЛЯ ЗАЯВОК (ОБЯЗАТЕЛЬНО ЗАПОЛНИ РЕАЛЬНЫМИ ДАННЫМИ)
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxiuUMeslxZOUBC2Y4sg2QqJe_Iy5u8qA3WE7j3sWfuvWmzXz8P807FK9m7Q5YFiWs2/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx3cZ69_siYWU5SDAxHrp58sX_ZZux1-Tmfgx5HCRwC0tUcE0bn9qWYt4dI_3MqNms2/exec';
 const SECRET_KEY = 'SecretParol999';
 
 const DEFAULT_AGENT_DATA = { name: '', role: '', agencyName: '', agencyAddress: '', telegramUsername: '', phone: '' };
